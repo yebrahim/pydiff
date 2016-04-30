@@ -1,29 +1,43 @@
 from tkinter import *
-from tkinter import ttk
 from tkinter.filedialog import askopenfilename
 from tkinter.messagebox import showerror
+from tkinter.font import Font
+import difflib
 
 root = Tk()
 root.title("Difftools")
 
 leftFile = StringVar()
 rightFile = StringVar()
+leftFileContentsString = ""
+rightFileContentsString = ""
 
 def load_file(pos):
+    global leftFileContentsString
+    global rightFileContentsString
     fname = askopenfilename()
     if fname:
         try:
+            leftFileTextArea.config(state=NORMAL)
+            rightFileTextArea.config(state=NORMAL)
             text = open(fname).read()
             if pos == 'right':
                 rightFile.set(fname)
-                rightFileText.insert(1.0, text)
+                rightFileContentsString = text
+                rightFileTextArea.delete(1.0, END) 
+                rightFileTextArea.insert(1.0, text)
             else:
                 leftFile.set(fname)
-                leftFileText.insert(1.0, text)
-            print(pos, " ", fname)
-        except:
-            showerror("Open Source File", "Failed to read file\n'%s'" % fname)
+                leftFileContentsString = text
+                leftFileTextArea.delete(1.0, END) 
+                leftFileTextArea.insert(1.0, text)
+            highlight_diffs()
+        except Exception as e:
+            showerror("Open Source File", "Failed to read file\n'%s'. Error: %s" % (fname, e))
             return
+        finally:
+            leftFileTextArea.config(state=DISABLED)
+            rightFileTextArea.config(state=DISABLED)
 
 # Buttons
 leftFileButton = Button(root, text="Browse", command=lambda:load_file("left"), width=10)
@@ -38,30 +52,86 @@ rightFileLabel = Label(root, text="Right file: ")
 rightFileLabel.grid(row=2, column=2, sticky=W)
 
 # Text areas
-leftFileText = Text(root, padx=5, pady=5, width=1, height=1)
-leftFileText.grid(row=3, column=0, sticky=N+E+S+W)
-rightFileText = Text(root, padx=5, pady=5, width=1, height=1)
-rightFileText.grid(row=3, column=2, sticky=(N,S,E,W))
+regular_font = Font(family="Consolas", size=10)
+
+leftFileTextArea = Text(root, padx=5, pady=5, width=1, height=1)
+leftFileTextArea.grid(row=3, column=0, sticky=N+E+S+W)
+leftFileTextArea.config(font=regular_font)
+
+rightFileTextArea = Text(root, padx=5, pady=5, width=1, height=1)
+rightFileTextArea.grid(row=3, column=2, sticky=(N,S,E,W))
+rightFileTextArea.config(font=regular_font)
+
+# Highlight line in text area
+def tag_line(lineno, textArea, tag, charIdx=None):
+    try:
+        line_start = ""
+        line_end = ""
+        if charIdx:
+            line_start = str(lineno + 1) + "." + str(charIdx)
+            line_end = str(lineno + 1) + "." + str(charIdx + 1)
+            textArea.tag_remove(tag, line_start, line_end)
+        else:
+            line_start = str(lineno + 1) + ".0"
+            line_end = textArea.index("%s lineend" % line_start)
+        print("highlighting from ", line_start, " to ", line_end)
+        textArea.tag_add(tag, line_start, line_end)
+    except TclError as e:
+        showerror("problem", str(e))
+
+# Highlight diff tags
+def highlight_diffs():
+    diff = difflib.ndiff(leftFileContentsString.splitlines(), rightFileContentsString.splitlines())
+    lineno = 0
+    # print("-------------\n",'\n'.join(diff),"\n--------------")
+    for line in diff:
+        code = line[:2]
+        print("diff line: " + line)
+        if code == '- ':
+            tag_line(lineno, leftFileTextArea, "red")
+            tag_line(lineno, rightFileTextArea, "green")
+        elif code == '+ ':
+            tag_line(lineno, leftFileTextArea, "red")
+            tag_line(lineno, rightFileTextArea, "green")
+        if code == '? ':
+            # highlight individual characters
+            indices = [i - 2 for (i,c) in enumerate(line) if c == '-']
+            print(indices)
+            for i in indices:
+                tag_line(lineno, leftFileTextArea, "green", i)
+        if code in ['  ', '+ ']:
+            lineno += 1
 
 # for testing:
-leftFileText.insert(1.0, "line\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline")
-rightFileText.insert(1.0, "line\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline")
+leftFileContentsString = "line1\nline22\nsameline\nline3\nlion"
+rightFileContentsString = "line1\nline\nsameline\nline3a\nline\nline"
+leftFileTextArea.insert(1.0, leftFileContentsString)
+rightFileTextArea.insert(1.0, rightFileContentsString)
+
+# configuring a tag called diff
+leftFileTextArea.tag_configure("red", background="#ff365e")
+leftFileTextArea.tag_configure("darkred", background="#ff0000")
+rightFileTextArea.tag_configure("green", background="#27d62f")
+highlight_diffs()
+
+leftFileTextArea.config(state=DISABLED)
+rightFileTextArea.config(state=DISABLED)
 
 # UniScrollbar
 def scrollBoth(action, position, type=None):
-    leftFileText.yview_moveto(position)
-    rightFileText.yview_moveto(position)
+    leftFileTextArea.yview_moveto(position)
+    rightFileTextArea.yview_moveto(position)
 
 def updateScroll(first, last, type=None):
-    leftFileText.yview_moveto(first)
-    rightFileText.yview_moveto(first)
+    leftFileTextArea.yview_moveto(first)
+    rightFileTextArea.yview_moveto(first)
     uniScrollbar.set(first, last)
 
 uniScrollbar = Scrollbar(root)
 uniScrollbar.grid(row=3, column=1, stick=N+S)
 uniScrollbar.config(command=scrollBoth)
-leftFileText.config(yscrollcommand=updateScroll)
-rightFileText.config(yscrollcommand=updateScroll)
+leftFileTextArea.config(yscrollcommand=updateScroll)
+rightFileTextArea.config(yscrollcommand=updateScroll)
 
 root.grid_rowconfigure(3, weight=1)
 root.grid_columnconfigure(0, weight=1)
