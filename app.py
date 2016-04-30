@@ -62,19 +62,18 @@ rightFileTextArea = Text(root, padx=5, pady=5, width=1, height=1)
 rightFileTextArea.grid(row=3, column=2, sticky=(N,S,E,W))
 rightFileTextArea.config(font=regular_font)
 
-# Highlight line in text area
-def tag_line(lineno, textArea, tag, charIdx=None):
+# Highlight characters in a line in the given text area
+def tag_line_chars(lineno, textArea, tag, charIdx=None):
     try:
         line_start = ""
         line_end = ""
         if charIdx:
             line_start = str(lineno + 1) + "." + str(charIdx)
             line_end = str(lineno + 1) + "." + str(charIdx + 1)
-            textArea.tag_remove(tag, line_start, line_end)
+            textArea.tag_remove("red", line_start, line_end)
         else:
             line_start = str(lineno + 1) + ".0"
             line_end = textArea.index("%s lineend" % line_start)
-        print("highlighting from ", line_start, " to ", line_end)
         textArea.tag_add(tag, line_start, line_end)
     except TclError as e:
         showerror("problem", str(e))
@@ -84,23 +83,30 @@ def highlight_diffs():
     diff = difflib.ndiff(leftFileContentsString.splitlines(), rightFileContentsString.splitlines())
     lineno = 0
     # print("-------------\n",'\n'.join(diff),"\n--------------")
+    sawMinus = sawPlus = sawQ = False
     for line in diff:
         code = line[:2]
-        print("diff line: " + line)
+        # print("diff line # %d: %s" % (lineno, line))
         if code == '- ':
-            tag_line(lineno, leftFileTextArea, "red")
-            tag_line(lineno, rightFileTextArea, "green")
+            sawMinus = True
+            tag_line_chars(lineno, leftFileTextArea, "red")
+            # tag_line_chars(lineno, rightFileTextArea, "green")
         elif code == '+ ':
-            tag_line(lineno, leftFileTextArea, "red")
-            tag_line(lineno, rightFileTextArea, "green")
+            sawPlus = True
+            # tag_line_chars(lineno, leftFileTextArea, "red")
+            tag_line_chars(lineno, rightFileTextArea, "green")
         if code == '? ':
+            sawQ = True
             # highlight individual characters
-            indices = [i - 2 for (i,c) in enumerate(line) if c == '-']
-            print(indices)
-            for i in indices:
-                tag_line(lineno, leftFileTextArea, "green", i)
-        if code in ['  ', '+ ']:
+            minusIndices = [i - 2 for (i,c) in enumerate(line) if c == '-']
+            for i in minusIndices:
+                tag_line_chars(lineno, leftFileTextArea, "darkred", i)
+            plusIndices = [i - 2 for (i,c) in enumerate(line) if c == '+']
+            for i in plusIndices:
+                tag_line_chars(lineno, rightFileTextArea, "darkgreen", i)
+        if code == '  ' or (sawMinus and sawPlus and sawQ):
             lineno += 1
+            sawMinus = sawPlus = sawQ = False
 
 # for testing:
 leftFileContentsString = "line1\nline22\nsameline\nline3\nlion"
@@ -109,9 +115,10 @@ leftFileTextArea.insert(1.0, leftFileContentsString)
 rightFileTextArea.insert(1.0, rightFileContentsString)
 
 # configuring a tag called diff
-leftFileTextArea.tag_configure("red", background="#ff365e")
+leftFileTextArea.tag_configure("red", background="#ff9494")
 leftFileTextArea.tag_configure("darkred", background="#ff0000")
-rightFileTextArea.tag_configure("green", background="#27d62f")
+rightFileTextArea.tag_configure("green", background="#94ffaf")
+rightFileTextArea.tag_configure("darkgreen", background="#269141")
 highlight_diffs()
 
 leftFileTextArea.config(state=DISABLED)
