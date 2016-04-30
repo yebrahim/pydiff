@@ -21,7 +21,7 @@ def load_file(pos):
                 leftFile.set(fname)
                 leftFileText.insert(1.0, text)
             print(pos, " ", fname)
-        except:                     # <- naked except is a bad idea
+        except:
             showerror("Open Source File", "Failed to read file\n'%s'" % fname)
             return
 
@@ -43,11 +43,25 @@ leftFileText.grid(row=3, column=0, sticky=N+E+S+W)
 rightFileText = Text(root, padx=5, pady=5, width=1, height=1)
 rightFileText.grid(row=3, column=2, sticky=(N,S,E,W))
 
-# Scrollbars
-leftScrollbar = Scrollbar(root)
-leftScrollbar.grid(row=3, column=1, stick=N+S)
-leftScrollbar.config(command=leftFileText.yview)
-leftFileText.config(yscrollcommand=leftScrollbar.set)
+# for testing:
+leftFileText.insert(1.0, "line\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline")
+rightFileText.insert(1.0, "line\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline\nline")
+
+# UniScrollbar
+def scrollBoth(action, position, type=None):
+    leftFileText.yview_moveto(position)
+    rightFileText.yview_moveto(position)
+
+def updateScroll(first, last, type=None):
+    leftFileText.yview_moveto(first)
+    rightFileText.yview_moveto(first)
+    uniScrollbar.set(first, last)
+
+uniScrollbar = Scrollbar(root)
+uniScrollbar.grid(row=3, column=1, stick=N+S)
+uniScrollbar.config(command=scrollBoth)
+leftFileText.config(yscrollcommand=updateScroll)
+rightFileText.config(yscrollcommand=updateScroll)
 
 root.grid_rowconfigure(3, weight=1)
 root.grid_columnconfigure(0, weight=1)
