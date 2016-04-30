@@ -2,42 +2,31 @@ from tkinter import *
 from tkinter.filedialog import askopenfilename
 from tkinter.messagebox import showerror
 from tkinter.font import Font
+import os
 import difflib
 
 root = Tk()
 root.title("Difftools")
 
-leftFile = StringVar()
-rightFile = StringVar()
-leftFileContentsString = ""
-rightFileContentsString = ""
+def load_file_to_text_area(fname, textArea):
+    textArea.config(state=NORMAL)
+    try:
+        text = open(fname).read()
+        textArea.delete(1.0, END) 
+        textArea.insert(1.0, text)
+    except Exception as e:
+        showerror("Open Source File", "Failed to read file\n'%s'. Error: %s" % (fname, e))
+    finally:
+        textArea.config(state=DISABLED)
 
 def load_file(pos):
-    global leftFileContentsString
-    global rightFileContentsString
     fname = askopenfilename()
     if fname:
-        try:
-            leftFileTextArea.config(state=NORMAL)
-            rightFileTextArea.config(state=NORMAL)
-            text = open(fname).read()
-            if pos == 'right':
-                rightFile.set(fname)
-                rightFileContentsString = text
-                rightFileTextArea.delete(1.0, END) 
-                rightFileTextArea.insert(1.0, text)
-            else:
-                leftFile.set(fname)
-                leftFileContentsString = text
-                leftFileTextArea.delete(1.0, END) 
-                leftFileTextArea.insert(1.0, text)
-            highlight_diffs()
-        except Exception as e:
-            showerror("Open Source File", "Failed to read file\n'%s'. Error: %s" % (fname, e))
-            return
-        finally:
-            leftFileTextArea.config(state=DISABLED)
-            rightFileTextArea.config(state=DISABLED)
+        if pos == 'right':
+            load_file_to_text_area(fname, rightFileTextArea)
+        else:
+            load_file_to_text_area(fname, leftFileTextArea)
+        highlight_diffs()
 
 # Buttons
 leftFileButton = Button(root, text="Browse", command=lambda:load_file("left"), width=10)
@@ -57,10 +46,12 @@ regular_font = Font(family="Consolas", size=10)
 leftFileTextArea = Text(root, padx=5, pady=5, width=1, height=1)
 leftFileTextArea.grid(row=3, column=0, sticky=N+E+S+W)
 leftFileTextArea.config(font=regular_font)
+leftFileTextArea.config(wrap="none")
 
 rightFileTextArea = Text(root, padx=5, pady=5, width=1, height=1)
 rightFileTextArea.grid(row=3, column=2, sticky=(N,S,E,W))
 rightFileTextArea.config(font=regular_font)
+rightFileTextArea.config(wrap="none")
 
 # Highlight characters in a line in the given text area
 def tag_line_chars(lineno, textArea, tag, charIdx=None):
@@ -80,7 +71,9 @@ def tag_line_chars(lineno, textArea, tag, charIdx=None):
 
 # Highlight diff tags
 def highlight_diffs():
-    diff = difflib.ndiff(leftFileContentsString.splitlines(), rightFileContentsString.splitlines())
+    leftString = leftFileTextArea.get("1.0",END)
+    rightString = rightFileTextArea.get("1.0",END)
+    diff = difflib.ndiff(leftString.splitlines(), rightString.splitlines())
     lineno = 0
     # print("-------------\n",'\n'.join(diff),"\n--------------")
     sawMinus = sawPlus = sawQ = False
@@ -109,10 +102,10 @@ def highlight_diffs():
             sawMinus = sawPlus = sawQ = False
 
 # for testing:
-leftFileContentsString = "line1\nline22\nsameline\nline3\nlion"
-rightFileContentsString = "line1\nline\nsameline\nline3a\nline\nline"
-leftFileTextArea.insert(1.0, leftFileContentsString)
-rightFileTextArea.insert(1.0, rightFileContentsString)
+leftFile = os.getcwd() + os.path.sep + 'left.txt'
+rightFile = os.getcwd() + os.path.sep + 'right.txt'
+load_file_to_text_area(leftFile, leftFileTextArea)
+load_file_to_text_area(rightFile, rightFileTextArea)
 
 # configuring a tag called diff
 leftFileTextArea.tag_configure("red", background="#ff9494")
@@ -139,6 +132,16 @@ uniScrollbar.grid(row=3, column=1, stick=N+S)
 uniScrollbar.config(command=scrollBoth)
 leftFileTextArea.config(yscrollcommand=updateScroll)
 rightFileTextArea.config(yscrollcommand=updateScroll)
+
+leftHorizontalScrollbar = Scrollbar(root, orient=HORIZONTAL)
+leftHorizontalScrollbar.grid(row=4, column=0, stick=E+W)
+leftHorizontalScrollbar.config(command=leftFileTextArea.xview)
+leftFileTextArea.config(xscrollcommand=leftHorizontalScrollbar.set)
+
+rightHorizontalScrollbar = Scrollbar(root, orient=HORIZONTAL)
+rightHorizontalScrollbar.grid(row=4, column=2, stick=E+W)
+rightHorizontalScrollbar.config(command=rightFileTextArea.xview)
+rightFileTextArea.config(xscrollcommand=rightHorizontalScrollbar.set)
 
 root.grid_rowconfigure(3, weight=1)
 root.grid_columnconfigure(0, weight=1)
