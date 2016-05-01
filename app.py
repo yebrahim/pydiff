@@ -5,6 +5,9 @@ from tkinter.font import Font
 import os
 import difflib
 
+from LineNumbersWidget import TextWithLineNumbers
+from LineNumbersWidget import LineNumbersCanvas
+
 root = Tk()
 root.title("Difftools")
 
@@ -22,36 +25,15 @@ def load_file_to_text_area(fname, textArea):
 def load_file(pos):
     fname = askopenfilename()
     if fname:
-        if pos == 'right':
-            load_file_to_text_area(fname, rightFileTextArea)
-        else:
+        if pos == 'left':
             load_file_to_text_area(fname, leftFileTextArea)
+            leftFileLabel.config(text=fname)
+            leftLinenumbers.redraw()
+        else:
+            load_file_to_text_area(fname, rightFileTextArea)
+            rightFileLabel.config(text=fname)
+            # rightLinenumbers.redraw()
         highlight_diffs()
-
-# Buttons
-leftFileButton = Button(root, text="Browse", command=lambda:load_file("left"), width=10)
-leftFileButton.grid(row=1, column=0, sticky=W)
-rightFileButton = Button(root, text="Browse", command=lambda:load_file("right"), width=10)
-rightFileButton.grid(row=1, column=2, sticky=W)
-
-# Labels
-leftFileLabel = Label(root, text="Left file: ")
-leftFileLabel.grid(row=2, column=0, sticky=W)
-rightFileLabel = Label(root, text="Right file: ")
-rightFileLabel.grid(row=2, column=2, sticky=W)
-
-# Text areas
-regular_font = Font(family="Consolas", size=10)
-
-leftFileTextArea = Text(root, padx=5, pady=5, width=1, height=1)
-leftFileTextArea.grid(row=3, column=0, sticky=N+E+S+W)
-leftFileTextArea.config(font=regular_font)
-leftFileTextArea.config(wrap="none")
-
-rightFileTextArea = Text(root, padx=5, pady=5, width=1, height=1)
-rightFileTextArea.grid(row=3, column=2, sticky=(N,S,E,W))
-rightFileTextArea.config(font=regular_font)
-rightFileTextArea.config(wrap="none")
 
 # Highlight characters in a line in the given text area
 def tag_line_chars(lineno, textArea, tag, charIdx=None):
@@ -101,6 +83,59 @@ def highlight_diffs():
             lineno += 1
             sawMinus = sawPlus = sawQ = False
 
+# Rows
+browseButtonsRow = 0
+filePathLabelsRow = 1
+uniScrollbarRow = lineNumbersRow = textAreasRow = 2
+horizontalScrollbarRow = 3
+
+# Columns
+leftLineNumbersCol = 0
+leftBrowseButtonsCol = leftFilePathLabelsCol = 0    # should span at least two columns
+leftTextAreaCol = leftHorizontalScrollbarCol = 1
+uniScrollbarCol = 2
+rightLineNumbersCol = 3
+rightBrowseButtonsCol = rightFilePathLabelsCol = 4  # should span at least two columns
+rightTextAreaCol = rightHorizontalScrollbarCol = 4
+
+# Buttons
+leftFileButton = Button(root, text="Browse", command=lambda:load_file("left"), width=10)
+leftFileButton.grid(row=browseButtonsRow, column=leftBrowseButtonsCol, sticky=W, columnspan=2)
+rightFileButton = Button(root, text="Browse", command=lambda:load_file("right"), width=10)
+rightFileButton.grid(row=browseButtonsRow, column=rightBrowseButtonsCol, sticky=W, columnspan=2)
+
+# Labels
+leftFileLabel = Label(root, text="Left file: ")
+leftFileLabel.grid(row=filePathLabelsRow, column=leftFilePathLabelsCol, sticky=W, columnspan=2)
+rightFileLabel = Label(root, text="Right file: ")
+rightFileLabel.grid(row=filePathLabelsRow, column=rightFilePathLabelsCol, sticky=W, columnspan=2)
+
+# Text areas
+regular_font = Font(family="Consolas", size=10)
+
+leftFileTextArea = TextWithLineNumbers(root, padx=5, pady=5, width=1, height=1)
+leftFileTextArea.grid(row=textAreasRow, column=leftTextAreaCol, sticky=N+E+S+W)
+leftFileTextArea.config(font=regular_font)
+leftFileTextArea.config(wrap="none")
+
+rightFileTextArea = TextWithLineNumbers(root, padx=5, pady=5, width=1, height=1)
+rightFileTextArea.grid(row=textAreasRow, column=rightTextAreaCol, sticky=N+S+E+W)
+rightFileTextArea.config(font=regular_font)
+rightFileTextArea.config(wrap="none")
+
+# Line numbers
+leftLinenumbers = LineNumbersCanvas(root, width=30)
+leftLinenumbers.attach(leftFileTextArea)
+leftLinenumbers.grid(row=lineNumbersRow, column=leftLineNumbersCol, sticky=N+S)
+leftFileTextArea.bind("<<Change>>", leftLinenumbers.redraw)
+leftFileTextArea.bind("<Configure>", leftLinenumbers.redraw)
+
+rightLinenumbers = LineNumbersCanvas(root, width=30)
+rightLinenumbers.attach(rightFileTextArea)
+rightLinenumbers.grid(row=lineNumbersRow, column=rightLineNumbersCol, sticky=N+S)
+rightFileTextArea.bind("<<Change>>", rightLinenumbers.redraw)
+rightFileTextArea.bind("<Configure>", rightLinenumbers.redraw)
+
 # for testing:
 leftFile = os.getcwd() + os.path.sep + 'left.txt'
 rightFile = os.getcwd() + os.path.sep + 'right.txt'
@@ -128,24 +163,24 @@ def updateScroll(first, last, type=None):
     uniScrollbar.set(first, last)
 
 uniScrollbar = Scrollbar(root)
-uniScrollbar.grid(row=3, column=1, stick=N+S)
+uniScrollbar.grid(row=uniScrollbarRow, column=uniScrollbarCol, stick=N+S)
 uniScrollbar.config(command=scrollBoth)
 leftFileTextArea.config(yscrollcommand=updateScroll)
 rightFileTextArea.config(yscrollcommand=updateScroll)
 
 leftHorizontalScrollbar = Scrollbar(root, orient=HORIZONTAL)
-leftHorizontalScrollbar.grid(row=4, column=0, stick=E+W)
+leftHorizontalScrollbar.grid(row=horizontalScrollbarRow, column=leftHorizontalScrollbarCol, stick=E+W)
 leftHorizontalScrollbar.config(command=leftFileTextArea.xview)
 leftFileTextArea.config(xscrollcommand=leftHorizontalScrollbar.set)
 
 rightHorizontalScrollbar = Scrollbar(root, orient=HORIZONTAL)
-rightHorizontalScrollbar.grid(row=4, column=2, stick=E+W)
+rightHorizontalScrollbar.grid(row=horizontalScrollbarRow, column=rightHorizontalScrollbarCol, stick=E+W)
 rightHorizontalScrollbar.config(command=rightFileTextArea.xview)
 rightFileTextArea.config(xscrollcommand=rightHorizontalScrollbar.set)
 
-root.grid_rowconfigure(3, weight=1)
-root.grid_columnconfigure(0, weight=1)
-root.grid_columnconfigure(2, weight=1)
+root.grid_rowconfigure(textAreasRow, weight=1)
+root.grid_columnconfigure(leftTextAreaCol, weight=1)
+root.grid_columnconfigure(rightTextAreaCol, weight=1)
 
 for child in root.winfo_children(): child.grid_configure(padx=5, pady=5)
 
