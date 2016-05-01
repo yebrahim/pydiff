@@ -1,9 +1,8 @@
+import os, difflib
 from tkinter import *
 from tkinter.filedialog import askopenfilename
 from tkinter.messagebox import showerror
 from tkinter.font import Font
-import os
-import difflib
 
 from LineNumbersWidget import TextWithLineNumbers
 from LineNumbersWidget import LineNumbersCanvas
@@ -63,14 +62,21 @@ def highlight_diffs():
         code = line[:2]
         # print("diff line # %d: %s" % (lineno, line))
         if code == '- ':
+            print("diff line # %d: %s" % (lineno, line))
             sawMinus = True
             tag_line_chars(lineno, leftFileTextArea, "red")
-            # tag_line_chars(lineno, rightFileTextArea, "green")
+            # rightFileTextArea.config(state=NORMAL)
+            # rightFileTextArea.insert(str(lineno) + ".0", "\n")
+            # rightFileTextArea.config(state=DISABLED)
         elif code == '+ ':
+            print("diff line # %d: %s" % (lineno, line))
             sawPlus = True
-            # tag_line_chars(lineno, leftFileTextArea, "red")
             tag_line_chars(lineno, rightFileTextArea, "green")
+            # leftFileTextArea.config(state=NORMAL)
+            # leftFileTextArea.insert(str(lineno) + ".0", "\n")
+            # leftFileTextArea.config(state=DISABLED)
         if code == '? ':
+            print("diff line # %d: %s" % (lineno, line))
             sawQ = True
             # highlight individual characters
             minusIndices = [i - 2 for (i,c) in enumerate(line) if c == '-']
@@ -136,18 +142,11 @@ rightLinenumbers.grid(row=lineNumbersRow, column=rightLineNumbersCol, sticky=N+S
 rightFileTextArea.bind("<<Change>>", rightLinenumbers.redraw)
 rightFileTextArea.bind("<Configure>", rightLinenumbers.redraw)
 
-# for testing:
-leftFile = os.getcwd() + os.path.sep + 'left.txt'
-rightFile = os.getcwd() + os.path.sep + 'right.txt'
-load_file_to_text_area(leftFile, leftFileTextArea)
-load_file_to_text_area(rightFile, rightFileTextArea)
-
 # configuring a tag called diff
 leftFileTextArea.tag_configure("red", background="#ff9494")
 leftFileTextArea.tag_configure("darkred", background="#ff0000")
 rightFileTextArea.tag_configure("green", background="#94ffaf")
 rightFileTextArea.tag_configure("darkgreen", background="#269141")
-highlight_diffs()
 
 leftFileTextArea.config(state=DISABLED)
 rightFileTextArea.config(state=DISABLED)
@@ -194,5 +193,12 @@ h = 0.5 * sh
 x = (sw - w)/2
 y = (sh - h)/2
 root.geometry('%dx%d+%d+%d' % (w, h, x, y))
+
+# for testing:
+leftFile = os.getcwd() + os.path.sep + 'left.txt'
+rightFile = os.getcwd() + os.path.sep + 'right.txt'
+load_file_to_text_area(leftFile, leftFileTextArea)
+load_file_to_text_area(rightFile, rightFileTextArea)
+highlight_diffs()
 
 root.mainloop()
