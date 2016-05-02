@@ -165,9 +165,7 @@ class MainWindow:
         self.rightFileTextArea.delete(1.0, END)
 
         lineno = 0
-        line = differ.getNextLine()
-
-        while line:
+        for line in differ:
             if line['code'] == DiffCode.SIMILAR:
                 self.leftFileTextArea.insert('end', line['line'] + '\n')
                 self.rightFileTextArea.insert('end', line['line'] + '\n')
@@ -180,8 +178,6 @@ class MainWindow:
             elif line['code'] == DiffCode.CHANGED:
                 self.leftFileTextArea.insert('end', line['line'] + '\n', 'red')
                 self.rightFileTextArea.insert('end', line['newline'] + '\n', 'green')
-
-            line = differ.getNextLine()
 
         self.leftFileTextArea.config(state=DISABLED)
         self.rightFileTextArea.config(state=DISABLED)
