@@ -71,7 +71,7 @@
             if (Frame.CanGoBack && some other condition())
             {
                 //Indicate the back button press is handled so the app does not exit
-                //e.Handled = true;
+                //e.Handled = trux;
                 Frame.Navigate(typeof(StartPage));
             }
         }

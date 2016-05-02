@@ -154,10 +154,12 @@ class MainWindow:
 
     # Highlight diff tags
     def fill_text_and_highlight_diffs(self):
+
+        # enable text area edits so we can clear and insert into them
         self.leftFileTextArea.config(state=NORMAL)
         self.rightFileTextArea.config(state=NORMAL)
 
-        differ = DifflibParser(self.leftFileLines, self.rightFileLines)
+        differ = DifflibParser(self.leftFileLines.splitlines(), self.rightFileLines.splitlines())
 
         self.leftFileTextArea.delete(1.0, END)
         self.rightFileTextArea.delete(1.0, END)
@@ -166,7 +168,6 @@ class MainWindow:
         line = differ.getNextLine()
 
         while line:
-            # print('-------------\n',line,'\n--------------')
             if line['code'] == DiffCode.SIMILAR:
                 self.leftFileTextArea.insert('end', line['line'] + '\n')
                 self.rightFileTextArea.insert('end', line['line'] + '\n')
@@ -176,13 +177,11 @@ class MainWindow:
             elif line['code'] == DiffCode.LEFTONLY:
                 self.leftFileTextArea.insert('end', line['line'] + '\n', 'red')
                 self.rightFileTextArea.insert('end', '\n')
-            elif line['code'] == DiffCode.CHANGEDLEFT:
-                self.leftFileTextArea.insert('end', line['line'] + '\n')
-                self.rightFileTextArea.insert('end', line['line'] + '\n')
-            elif line['code'] == DiffCode.CHANGEDRIGHT:
-                self.leftFileTextArea.insert('end', line['line'] + '\n')
-                self.rightFileTextArea.insert('end', line['line'] + '\n')
+            elif line['code'] == DiffCode.CHANGED:
+                self.leftFileTextArea.insert('end', line['line'] + '\n', 'red')
+                self.rightFileTextArea.insert('end', line['newline'] + '\n', 'green')
 
             line = differ.getNextLine()
+
         self.leftFileTextArea.config(state=DISABLED)
         self.rightFileTextArea.config(state=DISABLED)
