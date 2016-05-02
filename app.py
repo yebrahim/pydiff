@@ -9,7 +9,7 @@ from LineNumbersWidget import TextWithLineNumbers
 from LineNumbersWidget import LineNumbersCanvas
 
 root = Tk()
-root.title('Difftools')
+root.title('Difflib')
 
 leftFileLines = ''
 rightFileLines = ''
@@ -58,8 +58,6 @@ def tag_line_chars(lineno, textArea, tag, charIdx=None):
 
 # Highlight diff tags
 def highlight_diffs():
-    # leftString = leftFileTextArea.get('1.0',END)
-    # rightString = rightFileTextArea.get('1.0',END)
     differ = DifflibParser(leftFileLines, rightFileLines)
 
     lineno = 0
@@ -89,38 +87,6 @@ def highlight_diffs():
 
     leftFileTextArea.config(state=DISABLED)
     rightFileTextArea.config(state=DISABLED)
-
-    # sawMinus = sawPlus = sawQ = False
-    # for line in diff:
-    #     code = line[:2]
-    #     # print('diff line # %d: %s' % (lineno, line))
-    #     if code == '- ':
-    #         print('diff line # %d: %s' % (lineno, line))
-    #         sawMinus = True
-    #         tag_line_chars(lineno, leftFileTextArea, 'red')
-    #         # rightFileTextArea.config(state=NORMAL)
-    #         # rightFileTextArea.insert(str(lineno) + '.0', '\n')
-    #         # rightFileTextArea.config(state=DISABLED)
-    #     elif code == '+ ':
-    #         print('diff line # %d: %s' % (lineno, line))
-    #         sawPlus = True
-    #         tag_line_chars(lineno, rightFileTextArea, 'green')
-    #         # leftFileTextArea.config(state=NORMAL)
-    #         # leftFileTextArea.insert(str(lineno) + '.0', '\n')
-    #         # leftFileTextArea.config(state=DISABLED)
-    #     if code == '? ':
-    #         print('diff line # %d: %s' % (lineno, line))
-    #         sawQ = True
-    #         # highlight individual characters
-    #         minusIndices = [i - 2 for (i,c) in enumerate(line) if c == '-']
-    #         for i in minusIndices:
-    #             tag_line_chars(lineno, leftFileTextArea, 'darkred', i)
-    #         plusIndices = [i - 2 for (i,c) in enumerate(line) if c == '+']
-    #         for i in plusIndices:
-    #             tag_line_chars(lineno, rightFileTextArea, 'darkgreen', i)
-    #     if code == '  ' or (sawMinus and sawPlus and sawQ):
-    #         lineno += 1
-    #         sawMinus = sawPlus = sawQ = False
 
 # Rows
 browseButtonsRow = 0
