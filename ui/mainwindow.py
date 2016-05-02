@@ -87,8 +87,10 @@ class MainWindow:
         # configuring a tag called diff
         self.leftFileTextArea.tag_configure('red', background='#ff9494')
         self.leftFileTextArea.tag_configure('darkred', background='#ff0000')
+        self.leftFileTextArea.tag_configure('gray', background='#cccccc')
         self.rightFileTextArea.tag_configure('green', background='#94ffaf')
         self.rightFileTextArea.tag_configure('darkgreen', background='#269141')
+        self.rightFileTextArea.tag_configure('gray', background='#cccccc')
 
         self.leftFileTextArea.config(state=DISABLED)
         self.rightFileTextArea.config(state=DISABLED)
@@ -159,25 +161,29 @@ class MainWindow:
         self.leftFileTextArea.config(state=NORMAL)
         self.rightFileTextArea.config(state=NORMAL)
 
-        differ = DifflibParser(self.leftFileLines.splitlines(), self.rightFileLines.splitlines())
+        diff = DifflibParser(self.leftFileLines.splitlines(), self.rightFileLines.splitlines())
 
         self.leftFileTextArea.delete(1.0, END)
         self.rightFileTextArea.delete(1.0, END)
 
         lineno = 0
-        for line in differ:
+        for line in diff:
             if line['code'] == DiffCode.SIMILAR:
                 self.leftFileTextArea.insert('end', line['line'] + '\n')
                 self.rightFileTextArea.insert('end', line['line'] + '\n')
             elif line['code'] == DiffCode.RIGHTONLY:
-                self.leftFileTextArea.insert('end', '\n')
+                self.leftFileTextArea.insert('end', '\n', 'gray')
                 self.rightFileTextArea.insert('end', line['line'] + '\n', 'green')
             elif line['code'] == DiffCode.LEFTONLY:
                 self.leftFileTextArea.insert('end', line['line'] + '\n', 'red')
-                self.rightFileTextArea.insert('end', '\n')
+                self.rightFileTextArea.insert('end', '\n', 'gray')
             elif line['code'] == DiffCode.CHANGED:
-                self.leftFileTextArea.insert('end', line['line'] + '\n', 'red')
-                self.rightFileTextArea.insert('end', line['newline'] + '\n', 'green')
+                for (i,c) in enumerate(line['line']):
+                    self.leftFileTextArea.insert('end', c, 'darkred' if i in line['leftchanges'] else 'red')
+                for (i,c) in enumerate(line['newline']):
+                    self.rightFileTextArea.insert('end', c, 'darkgreen' if i in line['rightchanges'] else 'green')
+                self.leftFileTextArea.insert('end', '\n')
+                self.rightFileTextArea.insert('end', '\n')
 
         self.leftFileTextArea.config(state=DISABLED)
         self.rightFileTextArea.config(state=DISABLED)
