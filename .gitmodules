@@ -1,0 +1,3 @@
+[submodule "difflibparser"]
+	path = difflibparser
+	url = https://github.com/yebrahim/difflibparser.git
