@@ -16,6 +16,9 @@ class MainWindow:
         self.main_window_ui.create_text_areas()
         self.main_window_ui.create_line_numbers()
         self.main_window_ui.create_scroll_bars()
+        self.main_window_ui.create_file_treeview()
+        # path_to_my_project = os.getcwd()
+        # self.browse_process_directory('', path_to_my_project)
         self.main_window_ui.add_menu('File', [
             {'name': 'Compare Files', 'command': self.browse_files},
             {'name': 'Compare Directories', 'command': self.browse_directories},
@@ -38,9 +41,24 @@ class MainWindow:
         self.load_file('left')
         self.load_file('right')
 
+    # Load directories into the treeview
     def browse_directories(self):
         self.load_directory('left')
         self.load_directory('right')
+        path_to_my_project = os.getcwd()
+        self.browse_process_directory(path_to_my_project)
+        self.fill_text_and_highlight_diffs()
+
+    # Recursive method to fill the treevie with given directory hierarchy
+    def browse_process_directory(self, parent, path):
+        if parent == '':
+            self.main_window_ui.fileTreeView.heading('#0', text=path, anchor=W)
+        for p in os.listdir(path):
+            abspath = os.path.join(path, p)
+            isdir = os.path.isdir(abspath)
+            oid = self.main_window_ui.fileTreeView.insert(parent, 'end', text=p, open=False)
+            if isdir:
+                self.browse_process_directory(oid, abspath)
 
     def load_file(self, pos):
         fname = askopenfilename()
