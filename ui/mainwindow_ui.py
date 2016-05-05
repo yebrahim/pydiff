@@ -1,5 +1,4 @@
 from tkinter import *
-from tkinter.filedialog import askopenfilename
 from tkinter.messagebox import showerror
 from tkinter.font import Font
 from linenumberswidget import TextWithLineNumbers
@@ -27,35 +26,43 @@ class MainWindowUI:
         self.main_window.grid_rowconfigure(self.textAreasRow, weight=1)
         self.main_window.grid_columnconfigure(self.leftTextAreaCol, weight=1)
         self.main_window.grid_columnconfigure(self.rightTextAreaCol, weight=1)
+        self.menubar = Menu(self.main_window)
+        self.menus = {}
 
-        self.create_browse_buttons()
-        self.create_file_path_labels()
-        self.create_text_areas()
-        self.create_line_numbers()
-        self.create_scroll_bars()
+    # Center window and set its size
+    def center_window(self):
+        sw = self.main_window.winfo_screenwidth()
+        sh = self.main_window.winfo_screenheight()
 
-        for child in self.main_window.winfo_children(): child.grid_configure(padx=5, pady=5)
+        w = 0.5 * sw
+        h = 0.5 * sh
+
+        x = (sw - w)/2
+        y = (sh - h)/2
+        self.main_window.geometry('%dx%d+%d+%d' % (w, h, x, y))
 
     # Menu bar
-    def create_menu_bar(self):
-        __thisMenuBar = Menu(__root)
-        __thisFileMenu = Menu(__thisMenuBar,tearoff=0)
-        __thisEditMenu = Menu(__thisMenuBar,tearoff=0)
-        __thisHelpMenu = Menu(__thisMenuBar,tearoff=0)
+    def add_menu(self, menuName, commandList):
+        self.menus[menuName] = Menu(self.menubar,tearoff=0)
+        for c in commandList:
+            if 'separator' in c: self.menus[menuName].add_separator()
+            else: self.menus[menuName].add_command(label=c['name'], command=c['command'])
+        self.menubar.add_cascade(label=menuName, menu=self.menus[menuName])
+        self.main_window.config(menu=self.menubar)
 
     # Buttons
-    def create_browse_buttons(self):
-        leftFileButton = Button(self.main_window, text='Browse', command=lambda:self.load_file('left'), width=10)
-        leftFileButton.grid(row=self.browseButtonsRow, column=self.leftBrowseButtonsCol, sticky=W, columnspan=2)
-        rightFileButton = Button(self.main_window, text='Browse', command=lambda:self.load_file('right'), width=10)
-        rightFileButton.grid(row=self.browseButtonsRow, column=self.rightBrowseButtonsCol, sticky=W, columnspan=2)
+    def create_browse_buttons(self, leftLoadButtonCallback, rightLoadButtonCallback):
+        self.leftFileButton = Button(self.main_window, text='Browse', command=leftLoadButtonCallback, width=10)
+        self.leftFileButton.grid(row=self.browseButtonsRow, column=self.leftBrowseButtonsCol, sticky=W, columnspan=2)
+        self.rightFileButton = Button(self.main_window, text='Browse', command=rightLoadButtonCallback, width=10)
+        self.rightFileButton.grid(row=self.browseButtonsRow, column=self.rightBrowseButtonsCol, sticky=W, columnspan=2)
 
     # Labels
     def create_file_path_labels(self):
         self.leftFileLabel = Label(self.main_window, text='Left file: ')
-        self.leftFileLabel.grid(row=self.filePathLabelsRow, column=self.leftFilePathLabelsCol, sticky=W, columnspan=2)
+        self.leftFileLabel.grid(row=self.filePathLabelsRow, column=self.leftFilePathLabelsCol, sticky=EW, columnspan=2)
         self.rightFileLabel = Label(self.main_window, text='Right file: ')
-        self.rightFileLabel.grid(row=self.filePathLabelsRow, column=self.rightFilePathLabelsCol, sticky=W, columnspan=2)
+        self.rightFileLabel.grid(row=self.filePathLabelsRow, column=self.rightFilePathLabelsCol, sticky=EW, columnspan=2)
 
     # Text areas
     def create_text_areas(self):

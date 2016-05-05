@@ -2,40 +2,64 @@ import os
 from difflibparser.difflibparser import *
 from ui.mainwindow_ui import MainWindowUI
 from tkinter import *
+from tkinter.filedialog import askopenfilename, askdirectory
 
 class MainWindow:
-    def start(self, leftLines = '', rightLines = ''):
-        self.leftFileLines = leftLines
-        self.rightFileLines = rightLines
-
+    def start(self, leftFile = None, rightFile = None):
         self.main_window = Tk()
         self.main_window.title('Difftools')
         self.main_window_ui = MainWindowUI(self.main_window)
 
-        # Center window
-        sw = self.main_window.winfo_screenwidth()
-        sh = self.main_window.winfo_screenheight()
+        self.main_window_ui.center_window()
+        # self.main_window_ui.create_browse_buttons(lambda:self.load_file('left'), lambda:self.load_file('right'))
+        self.main_window_ui.create_file_path_labels()
+        self.main_window_ui.create_text_areas()
+        self.main_window_ui.create_line_numbers()
+        self.main_window_ui.create_scroll_bars()
+        self.main_window_ui.add_menu('File', [
+            {'name': 'Compare Files', 'command': self.browse_files},
+            {'name': 'Compare Directories', 'command': self.browse_directories},
+            {'separator'},
+            {'name': 'Exit', 'command': self.exit}
+            ])
 
-        w = 0.5 * sw
-        h = 0.5 * sh
+        if leftFile != None:
+            self.leftFileContents = open(leftFile).read()
+            self.main_window_ui.leftFileLabel.config(text=leftFile)
 
-        x = (sw - w)/2
-        y = (sh - h)/2
-        self.main_window.geometry('%dx%d+%d+%d' % (w, h, x, y))
+        if rightFile != None:
+            self.rightFileContents = open(rightFile).read()
+            self.main_window_ui.rightFileLabel.config(text=rightFile)
 
         self.fill_text_and_highlight_diffs()
         self.main_window.mainloop()
+
+    def browse_files(self):
+        self.load_file('left')
+        self.load_file('right')
+
+    def browse_directories(self):
+        self.load_directory('left')
+        self.load_directory('right')
 
     def load_file(self, pos):
         fname = askopenfilename()
         if fname:
             if pos == 'left':
-                self.leftFileLines = open(fname).read()
-                self.leftFileLabel.config(text=fname)
+                self.leftFileContents = open(fname).read()
+                self.main_window_ui.leftFileLabel.config(text=fname)
             else:
-                self.rightFileLines = open(fname).read()
-                self.rightFileLabel.config(text=fname)
+                self.rightFileContents = open(fname).read()
+                self.main_window_ui.rightFileLabel.config(text=fname)
             self.fill_text_and_highlight_diffs()
+
+    def load_directory(self, pos):
+        fname = askdirectory()
+        if fname:
+            if pos == 'left':
+                self.main_window_ui.leftFileLabel.config(text=fname)
+            else:
+                self.main_window_ui.rightFileLabel.config(text=fname)
 
     # Highlight characters in a line in the given text area
     def tag_line_chars(self, lineno, textArea, tag, charIdx=None):
@@ -60,7 +84,7 @@ class MainWindow:
         self.main_window_ui.leftFileTextArea.config(state=NORMAL)
         self.main_window_ui.rightFileTextArea.config(state=NORMAL)
 
-        diff = DifflibParser(self.leftFileLines.splitlines(), self.rightFileLines.splitlines())
+        diff = DifflibParser(self.leftFileContents.splitlines(), self.rightFileContents.splitlines())
 
         self.main_window_ui.leftFileTextArea.delete(1.0, END)
         self.main_window_ui.rightFileTextArea.delete(1.0, END)
@@ -86,3 +110,6 @@ class MainWindow:
 
         self.main_window_ui.leftFileTextArea.config(state=DISABLED)
         self.main_window_ui.rightFileTextArea.config(state=DISABLED)
+
+    def exit(self):
+        self.main_window.destroy()
