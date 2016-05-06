@@ -86,7 +86,7 @@ class MainWindowUI:
         self.fileTreeView.configure(yscroll=ysb.set, xscroll=xsb.set)
 
         self.fileTreeView.grid(row=self.fileTreeRow, column=self.fileTreeCol, sticky=NS, rowspan=2)
-        ysb.grid(row=self.fileTreeRow, column=self.fileTreeScrollbarCol, sticky=NS)
+        ysb.grid(row=self.fileTreeRow, column=self.fileTreeScrollbarCol, sticky=NS, rowspan=2)
         xsb.grid(row=self.horizontalScrollbarRow, column=self.fileTreeCol, sticky=EW)
 
         self.fileTreeView.tag_configure('red', background=self.redColor)
