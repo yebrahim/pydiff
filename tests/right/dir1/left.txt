@@ -1,0 +1,88 @@
+    /// <summary>
+    /// An empty page that can be used on its own or navigated to within a Frame.
+    /// </summary>
+    public sealed partial class GamePage : Page
+    {
+        int currentPlayer = 1;
+        int lastMoveRow = -1, lastMoveCol = -1;
+        public GameEngine game = new GameEngine();
+        Dictionary<UIElement, List<int>> elementToCell = new Dictionary<UIElement, List<int>>();
+        Dictionary<List<int>, UIElement> cellToElement = new Dictionary<List<int>, UIElement>();
+        Rectangle[,] rects = new Rectangle[9, 9];
+        Image[,] imgs = new Image[9, 9];
+        double cellHeight = 0, cellWidth = 0;
+        double imgHeight = 0, imgWidth = 0;
+        double turnImgWidth = 100, turnImgHeight = 50;
+        double appMargin = 20;
+        int rows = 9, cols = 9;
+        double imgToCellPerc = 0.8;
+        List<Storyboard> flashStoryboards = new List<Storyboard>();
+        string xturnSrc = "Assets/xturn.png";
+        string oturnSrc = "Assets/oturn.png";
+        GameMode gameMode = GameMode.TwoPlayer;
+        int greetingImgWidth = 220;
+        int greetingImgHeight = 75;
+        int gameOverImgWidth = 284;
+        int gameOverImgHeight = 153;
+        int newGameImgWidth = 200;
+        int newGameImgHeight = 70;
+        double greetingDurationSec = 2;
+        string[] randomGreetings = new string[] { "awesome", "goodjob", "nicework" };
+        bool soundEffectsEnabled = true;
+        MoveState lastMoveState = MoveState.SUCCESS_GAME_ON;
+
+        WavePlayer wavePlayer = new WavePlayer();
+
+        bool UIEnabled = true;
+
+        enum GameColor
+        {
+            BlackBackground,
+            NormalCell,
+            AvailableBoardGlow,
+            BoardWonX,
+            BoardWonO,
+            BoardDraw,
+            Border
+        }
+
+        public GamePage()
+        {
+            this.InitializeComponent();
+            wavePlayer.AddWave("playerX", "Assets/Sounds/Tap1.wav");
+            wavePlayer.AddWave("playerO", "Assets/Sounds/Tap2.wav");
+            wavePlayer.AddWave("boardWon", "Assets/Sounds/boardWon.wav");
+            wavePlayer.AddWave("gameWon", "Assets/Sounds/gameWon.wav");
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            Windows.Phone.UI.Input.HardwareButtons.BackPressed -= HardwareButtons_BackPressed;
+        }
+
+        async void HardwareButtons_BackPressed(object sender, Windows.Phone.UI.Input.BackPressedEventArgs e)
+        {
+            e.Handled = true;
+            // if at least one move has been played, and the game is still running
+            if (lastMoveCol > -1 && lastMoveState != MoveState.GAME_OVER)
+            {
+                var dialog = new Windows.UI.Popups.MessageDialog("Are you sure you want to leave this game? Your progress will be lost!");
+                bool? exitSelected = null;
+                dialog.Commands.Add(new UICommand("Exit", new UICommandInvokedHandler((cmd) => exitSelected = true)));
+                dialog.Commands.Add(new UICommand("Cancel", new UICommandInvokedHandler((cmd) => exitSelected = false)));
+                await dialog.ShowAsync();
+
+                if (exitSelected.HasValue && !exitSelected.Value)
+                {
+                    e.Handled = true;
+                    return;
+                }
+            }
+
+            if (Frame.CanGoBack)
+            {
+                //Indicate the back button press is handled so the app does not exit
+                e.Handled = true;
+                Frame.Navigate(typeof(StartPage));
+            }
+        }

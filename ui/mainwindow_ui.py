@@ -4,7 +4,6 @@ from tkinter.messagebox import showerror
 from tkinter.font import Font
 from ui.linenumberswidget import TextWithLineNumbers
 from ui.linenumberswidget import LineNumbersCanvas
-from ui.treeviewwidget import FileTreeView
 import os
 
 class MainWindowUI:

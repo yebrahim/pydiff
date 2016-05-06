@@ -1,4 +1,4 @@
-import os
+import os, mimetypes, filecmp
 from difflibparser.difflibparser import *
 from ui.mainwindow_ui import MainWindowUI
 from tkinter import *
@@ -6,6 +6,7 @@ from tkinter.filedialog import askopenfilename, askdirectory
 
 class MainWindow:
     def start(self, leftFile = None, rightFile = None):
+        self.fileDiffs = {}
         self.main_window = Tk()
         self.main_window.title('Difftools')
         self.main_window_ui = MainWindowUI(self.main_window)
@@ -69,14 +70,20 @@ class MainWindow:
             else:
                 newLeftPath = os.path.join(leftPath, l)
                 newRightPath = os.path.join(rightPath, l)
+                # If one of the diffed items is a file and the other is a directory, show in yellow indicating a difference
                 if (not os.path.isdir(newLeftPath) and os.path.isdir(newRightPath)) or (os.path.isdir(newLeftPath) and not os.path.isdir(newRightPath)):
                     self.main_window_ui.fileTreeView.insert(parent, 'end', text=l, open=False, tags=('yellow'))
                 else:
-                    # Diff the two files to either show them in white or yellow
-                    # For now, show them in white
-                    oid = self.main_window_ui.fileTreeView.insert(parent, 'end', text=l, open=False)
+                    # If both are directories, show in white and recurse on contents
                     if os.path.isdir(newLeftPath) and os.path.isdir(newRightPath):
+                        oid = self.main_window_ui.fileTreeView.insert(parent, 'end', text=l, open=False)
                         self.browse_process_directory(oid, newLeftPath, newRightPath)
+                    else:
+                        # Both are files. diff the two files to either show them in white or yellow
+                        if (filecmp.cmp(newLeftPath, newRightPath)):
+                            oid = self.main_window_ui.fileTreeView.insert(parent, 'end', text=l, open=False)
+                        else:
+                            oid = self.main_window_ui.fileTreeView.insert(parent, 'end', text=l, open=False, tags=('yellow'))
 
     def load_file(self, pos):
         fname = askopenfilename()
