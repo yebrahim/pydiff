@@ -7,27 +7,7 @@
         int lastMoveRow = -1, lastMoveCol = -1;
         public GameEngine game = new GameEngine();
         Dictionary<UIElement, List<int>> elementToCell = new Dictionary<UIElement, List<int>>();
-        Dictionary<List<int>, UIElement> cellToElement = new Dictionary<List<int>, UIElement>();
-        Rectangle[,] rects = new Rectangle[9, 9];
-        Image[,] imgs = new Image[9, 9];
-        double cellHeight = 0, cellWidth = 0;
-        double imgHeight = 0, imgWidth = 0;
-        double turnImgWidth = 100, turnImgHeight = 50;
-        double appMargin = 20;
-        int rows = 9, cols = 9;
-        double imgToCellPerc = 0.8;
-        List<Storyboard> flashStoryboards = new List<Storyboard>();
-        string xturnSrc = "Assets/xturn.png";
-        string oturnSrc = "Assets/oturn.png";
-        GameMode gameMode = GameMode.TwoPlayer;
-        int greetingImgWidth = 220;
-        int greetingImgHeight = 75;
-        int gameOverImgWidth = 284;
-        int gameOverImgHeight = 153;
-        int newGameImgWidth = 200;
-        int newGameImgHeight = 70;
-        double greetingDurationSec = 2;
-        string[] randomGreetings = new string[] { "awesome", "goodjob", "nicework" };
+        Dictionary<List<int>, UIElement> cellToElement = new Dictionary<List<i
         bool soundEffectsEnabled = true;
         MoveState lastMoveState = MoveState.SUCCESS_GAME_ON;
 

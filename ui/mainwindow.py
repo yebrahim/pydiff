@@ -6,36 +6,40 @@ from tkinter.filedialog import askopenfilename, askdirectory
 
 class MainWindow:
     def start(self, leftFile = None, rightFile = None):
-        self.fileDiffs = {}
         self.main_window = Tk()
         self.main_window.title('Difftools')
         self.main_window_ui = MainWindowUI(self.main_window)
 
+        self.leftFile = StringVar()
+        self.rightFile = StringVar()
+        self.leftFile.trace('w', lambda *x:self.__filesChanged())
+        self.rightFile.trace('w', lambda *x:self.__filesChanged())
+
         self.main_window_ui.center_window()
-        # self.main_window_ui.create_browse_buttons(lambda:self.load_file('left'), lambda:self.load_file('right'))
         self.main_window_ui.create_file_path_labels()
         self.main_window_ui.create_text_areas()
         self.main_window_ui.create_line_numbers()
         self.main_window_ui.create_scroll_bars()
         self.main_window_ui.create_file_treeview()
         path_to_my_project = os.getcwd()
-        self.browse_process_directory('', path_to_my_project, path_to_my_project)
         self.main_window_ui.add_menu('File', [
             {'name': 'Compare Files', 'command': self.browse_files},
             {'name': 'Compare Directories', 'command': self.browse_directories},
             {'separator'},
             {'name': 'Exit', 'command': self.exit}
             ])
+        self.main_window_ui.add_menu('Edit', [
+            {'name': 'Cut', 'command': self.__cut},
+            {'name': 'Copy', 'command': self.__copy},
+            {'name': 'Paste', 'command': self.__paste}
+            ])
 
         if leftFile != None:
-            self.leftFileContents = open(leftFile).read()
-            self.main_window_ui.leftFileLabel.config(text=leftFile)
+            self.leftFile = leftFile
 
         if rightFile != None:
-            self.rightFileContents = open(rightFile).read()
-            self.main_window_ui.rightFileLabel.config(text=rightFile)
+            self.rightFile = rightFile
 
-        self.fill_text_and_highlight_diffs()
         self.main_window.mainloop()
 
     def browse_files(self):
@@ -46,9 +50,9 @@ class MainWindow:
     def browse_directories(self):
         leftDir = self.load_directory('left')
         rightDir = self.load_directory('right')
-        self.main_window_ui.fileTreeView.delete(*self.main_window_ui.fileTreeView.get_children())
-        self.browse_process_directory('', leftDir, rightDir)
-        self.fill_text_and_highlight_diffs()
+        if leftDir and rightDir:
+            self.main_window_ui.fileTreeView.delete(*self.main_window_ui.fileTreeView.get_children())
+            self.browse_process_directory('', leftDir, rightDir)
 
     # Recursive method to fill the treevie with given directory hierarchy
     def browse_process_directory(self, parent, leftPath, rightPath):
@@ -89,21 +93,23 @@ class MainWindow:
         fname = askopenfilename()
         if fname:
             if pos == 'left':
-                self.leftFileContents = open(fname).read()
-                self.main_window_ui.leftFileLabel.config(text=fname)
+                self.leftFile.set(fname)
             else:
-                self.rightFileContents = open(fname).read()
-                self.main_window_ui.rightFileLabel.config(text=fname)
-            self.fill_text_and_highlight_diffs()
+                self.rightFile.set(fname)
+            return fname
+        else:
+            return None
 
     def load_directory(self, pos):
-        fname = askdirectory()
-        if fname:
+        dirName = askdirectory()
+        if dirName:
             if pos == 'left':
-                self.main_window_ui.leftFileLabel.config(text=fname)
+                self.main_window_ui.leftFileLabel.config(text=dirName)
             else:
-                self.main_window_ui.rightFileLabel.config(text=fname)
-        return fname
+                self.main_window_ui.rightFileLabel.config(text=dirName)
+            return dirName
+        else:
+            return None
 
     # Highlight characters in a line in the given text area
     def tag_line_chars(self, lineno, textArea, tag, charIdx=None):
@@ -121,14 +127,33 @@ class MainWindow:
         except TclError as e:
             showerror('problem', str(e))
 
-    # Highlight diff tags
-    def fill_text_and_highlight_diffs(self):
+    # Callback for changing a file path
+    def __filesChanged(self):
+        if self.leftFile.get() == None or self.rightFile.get() == None:
+            self.main_window_ui.leftFileTextArea.config(background=self.main_window_ui.grayColor)
+            self.main_window_ui.rightFileTextArea.config(background=self.main_window_ui.grayColor)
+            return
+
+        if not os.path.exists(self.leftFile.get()) or not os.path.exists(self.rightFile.get()):
+            return
+
+        self.main_window_ui.leftFileLabel.config(text=self.leftFile.get())
+        self.main_window_ui.rightFileLabel.config(text=self.rightFile.get())
+        self.diff_files_into_text_areas()
+
+    # Insert file contents into text areas and highlight differences
+    def diff_files_into_text_areas(self):
+        self.main_window_ui.leftFileTextArea.config(background=self.main_window_ui.whiteColor)
+        self.main_window_ui.rightFileTextArea.config(background=self.main_window_ui.whiteColor)
 
         # enable text area edits so we can clear and insert into them
         self.main_window_ui.leftFileTextArea.config(state=NORMAL)
         self.main_window_ui.rightFileTextArea.config(state=NORMAL)
 
-        diff = DifflibParser(self.leftFileContents.splitlines(), self.rightFileContents.splitlines())
+        leftFileContents = open(self.leftFile.get()).read()
+        rightFileContents = open(self.rightFile.get()).read()
+
+        diff = DifflibParser(leftFileContents.splitlines(), rightFileContents.splitlines())
 
         self.main_window_ui.leftFileTextArea.delete(1.0, END)
         self.main_window_ui.rightFileTextArea.delete(1.0, END)
@@ -155,5 +180,30 @@ class MainWindow:
         self.main_window_ui.leftFileTextArea.config(state=DISABLED)
         self.main_window_ui.rightFileTextArea.config(state=DISABLED)
 
+    def __cut(self):
+        area = self.__getActiveTextArea()
+        if area:
+            area.event_generate("<<Cut>>")
+
+    def __copy(self):
+        area = self.__getActiveTextArea()
+        if area:
+            area.event_generate("<<Copy>>")
+
+    def __paste(self):
+        area = self.__getActiveTextArea()
+        if area:
+            area.event_generate("<<Paste>>")
+
+    def __getActiveTextArea(self):
+        if self.main_window.focus_get() == self.main_window_ui.leftFileTextArea:
+            return self.main_window_ui.leftFileTextArea
+        elif self.main_window.focus_get() == self.main_window_ui.rightFileTextArea:
+            return self.main_window_ui.rightFileTextArea
+        else:
+            return None
+
     def exit(self):
         self.main_window.destroy()
+
+

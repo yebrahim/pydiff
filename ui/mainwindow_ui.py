@@ -26,6 +26,7 @@ class MainWindowUI:
     rightTextAreaCol = rightHorizontalScrollbarCol = 6
 
     # Colors
+    whiteColor = '#ffffff'
     redColor = '#ff9494'
     darkredColor = '#ff0000'
     grayColor = '#cccccc'
@@ -96,12 +97,12 @@ class MainWindowUI:
     def create_text_areas(self):
         regular_font = Font(family='Consolas', size=10)
 
-        self.leftFileTextArea = TextWithLineNumbers(self.main_window, padx=5, pady=5, width=1, height=1)
+        self.leftFileTextArea = TextWithLineNumbers(self.main_window, padx=5, pady=5, width=1, height=1, bg=self.grayColor)
         self.leftFileTextArea.grid(row=self.textAreasRow, column=self.leftTextAreaCol, sticky=NSEW)
         self.leftFileTextArea.config(font=regular_font)
         self.leftFileTextArea.config(wrap='none')
 
-        self.rightFileTextArea = TextWithLineNumbers(self.main_window, padx=5, pady=5, width=1, height=1)
+        self.rightFileTextArea = TextWithLineNumbers(self.main_window, padx=5, pady=5, width=1, height=1, bg=self.grayColor)
         self.rightFileTextArea.grid(row=self.textAreasRow, column=self.rightTextAreaCol, sticky=NSEW)
         self.rightFileTextArea.config(font=regular_font)
         self.rightFileTextArea.config(wrap='none')
