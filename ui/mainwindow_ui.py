@@ -11,8 +11,8 @@ class MainWindowUI:
 
     # Rows
     browseButtonsRow = 0
-    filePathLabelsRow = 1
-    fileTreeRow = uniScrollbarRow = lineNumbersRow = textAreasRow = 2
+    fileTreeRow = filePathLabelsRow = 1
+    uniScrollbarRow = lineNumbersRow = textAreasRow = 2
     horizontalScrollbarRow = 3
 
     # Columns
@@ -26,8 +26,17 @@ class MainWindowUI:
     rightBrowseButtonsCol = rightFilePathLabelsCol = 6  # should span at least two columns
     rightTextAreaCol = rightHorizontalScrollbarCol = 6
 
+    # Colors
+    redColor = '#ff9494'
+    darkredColor = '#ff0000'
+    grayColor = '#cccccc'
+    greenColor = '#94ffaf'
+    darkgreenColor = '#269141'
+    yellowColor = '#f0f58c'
+
     def __init__(self, window):
         self.main_window = window
+        self.main_window.grid_rowconfigure(self.filePathLabelsRow, weight=0)
         self.main_window.grid_rowconfigure(self.textAreasRow, weight=1)
         self.main_window.grid_columnconfigure(self.leftTextAreaCol, weight=1)
         self.main_window.grid_columnconfigure(self.rightTextAreaCol, weight=1)
@@ -65,9 +74,9 @@ class MainWindowUI:
     # Labels
     def create_file_path_labels(self):
         self.leftFileLabel = Label(self.main_window, text='Left file: ')
-        self.leftFileLabel.grid(row=self.filePathLabelsRow, column=self.leftFilePathLabelsCol, sticky=EW, columnspan=2)
+        self.leftFileLabel.grid(row=self.filePathLabelsRow, column=self.leftFilePathLabelsCol, columnspan=2)
         self.rightFileLabel = Label(self.main_window, text='Right file: ')
-        self.rightFileLabel.grid(row=self.filePathLabelsRow, column=self.rightFilePathLabelsCol, sticky=EW, columnspan=2)
+        self.rightFileLabel.grid(row=self.filePathLabelsRow, column=self.rightFilePathLabelsCol, columnspan=2)
 
     # File treeview
     def create_file_treeview(self):
@@ -76,9 +85,13 @@ class MainWindowUI:
         xsb = Scrollbar(self.main_window, orient='horizontal', command=self.fileTreeView.xview)
         self.fileTreeView.configure(yscroll=ysb.set, xscroll=xsb.set)
 
-        self.fileTreeView.grid(row=self.fileTreeRow, column=self.fileTreeCol, sticky=NS)
+        self.fileTreeView.grid(row=self.fileTreeRow, column=self.fileTreeCol, sticky=NS, rowspan=2)
         ysb.grid(row=self.fileTreeRow, column=self.fileTreeScrollbarCol, sticky=NS)
         xsb.grid(row=self.horizontalScrollbarRow, column=self.fileTreeCol, sticky=EW)
+
+        self.fileTreeView.tag_configure('red', background=self.redColor)
+        self.fileTreeView.tag_configure('green', background=self.greenColor)
+        self.fileTreeView.tag_configure('yellow', background=self.yellowColor)
 
     # Text areas
     def create_text_areas(self):
@@ -95,12 +108,12 @@ class MainWindowUI:
         self.rightFileTextArea.config(wrap='none')
 
         # configuring highlight tags
-        self.leftFileTextArea.tag_configure('red', background='#ff9494')
-        self.leftFileTextArea.tag_configure('darkred', background='#ff0000')
-        self.leftFileTextArea.tag_configure('gray', background='#cccccc')
-        self.rightFileTextArea.tag_configure('green', background='#94ffaf')
-        self.rightFileTextArea.tag_configure('darkgreen', background='#269141')
-        self.rightFileTextArea.tag_configure('gray', background='#cccccc')
+        self.leftFileTextArea.tag_configure('red', background=self.redColor)
+        self.leftFileTextArea.tag_configure('darkred', background=self.darkredColor)
+        self.leftFileTextArea.tag_configure('gray', background=self.grayColor)
+        self.rightFileTextArea.tag_configure('green', background=self.greenColor)
+        self.rightFileTextArea.tag_configure('darkgreen', background=self.darkgreenColor)
+        self.rightFileTextArea.tag_configure('gray', background=self.grayColor)
 
         # disable the text areas
         self.leftFileTextArea.config(state=DISABLED)

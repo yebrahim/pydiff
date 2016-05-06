@@ -17,8 +17,8 @@ class MainWindow:
         self.main_window_ui.create_line_numbers()
         self.main_window_ui.create_scroll_bars()
         self.main_window_ui.create_file_treeview()
-        # path_to_my_project = os.getcwd()
-        # self.browse_process_directory('', path_to_my_project)
+        path_to_my_project = os.getcwd()
+        self.browse_process_directory('', path_to_my_project, path_to_my_project)
         self.main_window_ui.add_menu('File', [
             {'name': 'Compare Files', 'command': self.browse_files},
             {'name': 'Compare Directories', 'command': self.browse_directories},
@@ -43,22 +43,40 @@ class MainWindow:
 
     # Load directories into the treeview
     def browse_directories(self):
-        self.load_directory('left')
-        self.load_directory('right')
-        path_to_my_project = os.getcwd()
-        self.browse_process_directory(path_to_my_project)
+        leftDir = self.load_directory('left')
+        rightDir = self.load_directory('right')
+        self.main_window_ui.fileTreeView.delete(*self.main_window_ui.fileTreeView.get_children())
+        self.browse_process_directory('', leftDir, rightDir)
         self.fill_text_and_highlight_diffs()
 
     # Recursive method to fill the treevie with given directory hierarchy
-    def browse_process_directory(self, parent, path):
+    def browse_process_directory(self, parent, leftPath, rightPath):
         if parent == '':
-            self.main_window_ui.fileTreeView.heading('#0', text=path, anchor=W)
-        for p in os.listdir(path):
-            abspath = os.path.join(path, p)
-            isdir = os.path.isdir(abspath)
-            oid = self.main_window_ui.fileTreeView.insert(parent, 'end', text=p, open=False)
-            if isdir:
-                self.browse_process_directory(oid, abspath)
+            leftDirName = os.path.basename(leftPath)
+            rightDirName = os.path.basename(rightPath)
+            self.main_window_ui.fileTreeView.heading('#0', text=leftDirName + ' / ' + rightDirName, anchor=W)
+        leftListing = os.listdir(leftPath)
+        rightListing = os.listdir(rightPath)
+        mergedListing = list(set(leftListing) | set(rightListing))
+        for l in mergedListing:
+            # Item in left dir only
+            if l in leftListing and l not in rightListing:
+                self.main_window_ui.fileTreeView.insert(parent, 'end', text=l, open=False, tags=('red'))
+            # Item in right dir only
+            elif l in rightListing and l not in leftListing:
+                self.main_window_ui.fileTreeView.insert(parent, 'end', text=l, open=False, tags=('green'))
+            # Item in both dirs
+            else:
+                newLeftPath = os.path.join(leftPath, l)
+                newRightPath = os.path.join(rightPath, l)
+                if (not os.path.isdir(newLeftPath) and os.path.isdir(newRightPath)) or (os.path.isdir(newLeftPath) and not os.path.isdir(newRightPath)):
+                    self.main_window_ui.fileTreeView.insert(parent, 'end', text=l, open=False, tags=('yellow'))
+                else:
+                    # Diff the two files to either show them in white or yellow
+                    # For now, show them in white
+                    oid = self.main_window_ui.fileTreeView.insert(parent, 'end', text=l, open=False)
+                    if os.path.isdir(newLeftPath) and os.path.isdir(newRightPath):
+                        self.browse_process_directory(oid, newLeftPath, newRightPath)
 
     def load_file(self, pos):
         fname = askopenfilename()
@@ -78,6 +96,7 @@ class MainWindow:
                 self.main_window_ui.leftFileLabel.config(text=fname)
             else:
                 self.main_window_ui.rightFileLabel.config(text=fname)
+        return fname
 
     # Highlight characters in a line in the given text area
     def tag_line_chars(self, lineno, textArea, tag, charIdx=None):
