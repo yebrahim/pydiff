@@ -33,9 +33,13 @@ class MainWindow:
             {'name': 'Copy', 'command': self.__copy},
             {'name': 'Paste', 'command': self.__paste}
             ])
+        self.main_window_ui.fileTreeView.bind('<<TreeviewSelect>>', lambda *x:self.__treeViewItemSelected())
 
         self.leftFile.set(leftFile if leftFile else '')
         self.rightFile.set(rightFile if rightFile else '')
+
+        ######### for test only
+        self.browse_process_directory('', 'tests/left_dir', 'tests/right_dir')
 
         self.main_window.mainloop()
 
@@ -61,19 +65,20 @@ class MainWindow:
         rightListing = os.listdir(rightPath)
         mergedListing = list(set(leftListing) | set(rightListing))
         for l in mergedListing:
+            newLeftPath = leftPath + '/' + l
+            newRightPath = rightPath + '/' + l
+            bindValue = (newLeftPath, newRightPath)
             # Item in left dir only
             if l in leftListing and l not in rightListing:
-                self.main_window_ui.fileTreeView.insert(parent, 'end', text=l, open=False, tags=('red'))
+                self.main_window_ui.fileTreeView.insert(parent, 'end', text=l, value=bindValue, open=False, tags=('red','simple'))
             # Item in right dir only
             elif l in rightListing and l not in leftListing:
-                self.main_window_ui.fileTreeView.insert(parent, 'end', text=l, open=False, tags=('green'))
+                self.main_window_ui.fileTreeView.insert(parent, 'end', text=l, value=bindValue, open=False, tags=('green','simple'))
             # Item in both dirs
             else:
-                newLeftPath = os.path.join(leftPath, l)
-                newRightPath = os.path.join(rightPath, l)
                 # If one of the diffed items is a file and the other is a directory, show in yellow indicating a difference
                 if (not os.path.isdir(newLeftPath) and os.path.isdir(newRightPath)) or (os.path.isdir(newLeftPath) and not os.path.isdir(newRightPath)):
-                    self.main_window_ui.fileTreeView.insert(parent, 'end', text=l, open=False, tags=('yellow'))
+                    self.main_window_ui.fileTreeView.insert(parent, 'end', text=l, value=bindValue, open=False, tags=('yellow','simple'))
                 else:
                     # If both are directories, show in white and recurse on contents
                     if os.path.isdir(newLeftPath) and os.path.isdir(newRightPath):
@@ -82,9 +87,9 @@ class MainWindow:
                     else:
                         # Both are files. diff the two files to either show them in white or yellow
                         if (filecmp.cmp(newLeftPath, newRightPath)):
-                            oid = self.main_window_ui.fileTreeView.insert(parent, 'end', text=l, open=False)
+                            oid = self.main_window_ui.fileTreeView.insert(parent, 'end', text=l, value=bindValue, open=False, tags=('simple'))
                         else:
-                            oid = self.main_window_ui.fileTreeView.insert(parent, 'end', text=l, open=False, tags=('yellow'))
+                            oid = self.main_window_ui.fileTreeView.insert(parent, 'end', text=l, value=bindValue, open=False, tags=('yellow','simple'))
 
     def load_file(self, pos):
         fname = askopenfilename()
@@ -143,6 +148,14 @@ class MainWindow:
         self.main_window_ui.leftLinenumbers.grid()
         self.main_window_ui.rightLinenumbers.grid()
         self.diff_files_into_text_areas()
+
+    def __treeViewItemSelected(self):
+        item_id = self.main_window_ui.fileTreeView.focus()
+        paths = self.main_window_ui.fileTreeView.item(item_id)['values']
+        if paths == None or len(paths) == 0:
+            return
+        self.leftFile.set(paths[0])
+        self.rightFile.set(paths[1])
 
     # Insert file contents into text areas and highlight differences
     def diff_files_into_text_areas(self):
