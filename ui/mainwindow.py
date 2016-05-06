@@ -34,11 +34,8 @@ class MainWindow:
             {'name': 'Paste', 'command': self.__paste}
             ])
 
-        if leftFile != None:
-            self.leftFile = leftFile
-
-        if rightFile != None:
-            self.rightFile = rightFile
+        self.leftFile.set(leftFile if leftFile else '')
+        self.rightFile.set(rightFile if rightFile else '')
 
         self.main_window.mainloop()
 
@@ -129,6 +126,8 @@ class MainWindow:
 
     # Callback for changing a file path
     def __filesChanged(self):
+        self.main_window_ui.leftLinenumbers.grid_remove()
+        self.main_window_ui.rightLinenumbers.grid_remove()
         if self.leftFile.get() == None or self.rightFile.get() == None:
             self.main_window_ui.leftFileTextArea.config(background=self.main_window_ui.grayColor)
             self.main_window_ui.rightFileTextArea.config(background=self.main_window_ui.grayColor)
@@ -139,19 +138,20 @@ class MainWindow:
 
         self.main_window_ui.leftFileLabel.config(text=self.leftFile.get())
         self.main_window_ui.rightFileLabel.config(text=self.rightFile.get())
+        self.main_window_ui.leftFileTextArea.config(background=self.main_window_ui.whiteColor)
+        self.main_window_ui.rightFileTextArea.config(background=self.main_window_ui.whiteColor)
+        self.main_window_ui.leftLinenumbers.grid()
+        self.main_window_ui.rightLinenumbers.grid()
         self.diff_files_into_text_areas()
 
     # Insert file contents into text areas and highlight differences
     def diff_files_into_text_areas(self):
-        self.main_window_ui.leftFileTextArea.config(background=self.main_window_ui.whiteColor)
-        self.main_window_ui.rightFileTextArea.config(background=self.main_window_ui.whiteColor)
+        leftFileContents = open(self.leftFile.get()).read()
+        rightFileContents = open(self.rightFile.get()).read()
 
         # enable text area edits so we can clear and insert into them
         self.main_window_ui.leftFileTextArea.config(state=NORMAL)
         self.main_window_ui.rightFileTextArea.config(state=NORMAL)
-
-        leftFileContents = open(self.leftFile.get()).read()
-        rightFileContents = open(self.rightFile.get()).read()
 
         diff = DifflibParser(leftFileContents.splitlines(), rightFileContents.splitlines())
 

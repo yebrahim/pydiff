@@ -73,9 +73,9 @@ class MainWindowUI:
 
     # Labels
     def create_file_path_labels(self):
-        self.leftFileLabel = Label(self.main_window, text='Left file: ')
+        self.leftFileLabel = Label(self.main_window)
         self.leftFileLabel.grid(row=self.filePathLabelsRow, column=self.leftFilePathLabelsCol, columnspan=2)
-        self.rightFileLabel = Label(self.main_window, text='Right file: ')
+        self.rightFileLabel = Label(self.main_window)
         self.rightFileLabel.grid(row=self.filePathLabelsRow, column=self.rightFilePathLabelsCol, columnspan=2)
 
     # File treeview
@@ -121,20 +121,19 @@ class MainWindowUI:
 
     # Line numbers
     def create_line_numbers(self):
-        leftLinenumbers = LineNumbersCanvas(self.main_window, width=30)
-        leftLinenumbers.attach(self.leftFileTextArea)
-        leftLinenumbers.grid(row=self.lineNumbersRow, column=self.leftLineNumbersCol, sticky=NS)
-        self.leftFileTextArea.bind('<<Change>>', leftLinenumbers.redraw)
-        self.leftFileTextArea.bind('<Configure>', leftLinenumbers.redraw)
+        self.leftLinenumbers = LineNumbersCanvas(self.main_window, width=20)
+        self.leftLinenumbers.attach(self.leftFileTextArea)
+        self.leftLinenumbers.grid(row=self.lineNumbersRow, column=self.leftLineNumbersCol, sticky=NS)
+        self.leftFileTextArea.bind('<<Change>>', self.leftLinenumbers.redraw)
+        self.leftFileTextArea.bind('<Configure>', self.leftLinenumbers.redraw)
 
-        rightLinenumbers = LineNumbersCanvas(self.main_window, width=30)
-        rightLinenumbers.attach(self.rightFileTextArea)
-        rightLinenumbers.grid(row=self.lineNumbersRow, column=self.rightLineNumbersCol, sticky=NS)
-        self.rightFileTextArea.bind('<<Change>>', rightLinenumbers.redraw)
-        self.rightFileTextArea.bind('<Configure>', rightLinenumbers.redraw)
+        self.rightLinenumbers = LineNumbersCanvas(self.main_window, width=20)
+        self.rightLinenumbers.attach(self.rightFileTextArea)
+        self.rightLinenumbers.grid(row=self.lineNumbersRow, column=self.rightLineNumbersCol, sticky=NS)
+        self.rightFileTextArea.bind('<<Change>>', self.rightLinenumbers.redraw)
+        self.rightFileTextArea.bind('<Configure>', self.rightLinenumbers.redraw)
 
     # Scroll bars
-
     def scrollBoth(self, action, position, type=None):
         self.leftFileTextArea.yview_moveto(position)
         self.rightFileTextArea.yview_moveto(position)

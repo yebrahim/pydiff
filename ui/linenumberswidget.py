@@ -25,7 +25,6 @@ class LineNumbersCanvas(tk.Canvas):
 class TextWithLineNumbers(tk.Text):
     def __init__(self, *args, **kwargs):
         tk.Text.__init__(self, *args, **kwargs)
-
         self.tk.eval('''
             proc widget_proxy {widget widget_command args} {
 
