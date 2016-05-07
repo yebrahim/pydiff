@@ -83,13 +83,13 @@ class MainWindowUI:
     # File treeview
     def create_file_treeview(self):
         self.fileTreeView = Treeview(self.main_window)
-        ysb = Scrollbar(self.main_window, orient='vertical', command=self.fileTreeView.yview)
-        xsb = Scrollbar(self.main_window, orient='horizontal', command=self.fileTreeView.xview)
-        self.fileTreeView.configure(yscroll=ysb.set, xscroll=xsb.set)
+        self.fileTreeYScrollbar = Scrollbar(self.main_window, orient='vertical', command=self.fileTreeView.yview)
+        self.fileTreeXScrollbar = Scrollbar(self.main_window, orient='horizontal', command=self.fileTreeView.xview)
+        self.fileTreeView.configure(yscroll=self.fileTreeYScrollbar.set, xscroll=self.fileTreeXScrollbar.set)
 
         self.fileTreeView.grid(row=self.fileTreeRow, column=self.fileTreeCol, sticky=NS, rowspan=2)
-        ysb.grid(row=self.fileTreeRow, column=self.fileTreeScrollbarCol, sticky=NS, rowspan=2)
-        xsb.grid(row=self.horizontalScrollbarRow, column=self.fileTreeCol, sticky=EW)
+        self.fileTreeYScrollbar.grid(row=self.fileTreeRow, column=self.fileTreeScrollbarCol, sticky=NS, rowspan=2)
+        self.fileTreeXScrollbar.grid(row=self.horizontalScrollbarRow, column=self.fileTreeCol, sticky=EW)
 
         self.fileTreeView.tag_configure('red', background=self.redColor)
         self.fileTreeView.tag_configure('green', background=self.greenColor)
