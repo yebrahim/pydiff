@@ -2,8 +2,6 @@ from tkinter import *
 from tkinter.ttk import *
 from tkinter.messagebox import showerror
 from tkinter.font import Font
-from ui.linenumberswidget import TextWithLineNumbers
-from ui.linenumberswidget import LineNumbersCanvas
 import os
 
 class MainWindowUI:
@@ -30,6 +28,7 @@ class MainWindowUI:
     redColor = '#ff9494'
     darkredColor = '#ff0000'
     grayColor = '#cccccc'
+    lightGrayColor = '#eeeeee'
     greenColor = '#94ffaf'
     darkgreenColor = '#269141'
     yellowColor = '#f0f58c'
@@ -40,8 +39,11 @@ class MainWindowUI:
         self.main_window.grid_rowconfigure(self.textAreasRow, weight=1)
         self.main_window.grid_columnconfigure(self.leftTextAreaCol, weight=1)
         self.main_window.grid_columnconfigure(self.rightTextAreaCol, weight=1)
+        self.main_window.grid_columnconfigure(self.leftLineNumbersCol, weight=0)
+        self.main_window.grid_columnconfigure(self.rightLineNumbersCol, weight=0)
         self.menubar = Menu(self.main_window)
         self.menus = {}
+        self.text_area_font = Font(family='Consolas', size=10)
 
     # Center window and set its size
     def center_window(self):
@@ -95,16 +97,14 @@ class MainWindowUI:
 
     # Text areas
     def create_text_areas(self):
-        regular_font = Font(family='Consolas', size=10)
-
-        self.leftFileTextArea = TextWithLineNumbers(self.main_window, padx=5, pady=5, width=1, height=1, bg=self.grayColor)
+        self.leftFileTextArea = Text(self.main_window, padx=5, pady=5, width=1, height=1, bg=self.grayColor)
         self.leftFileTextArea.grid(row=self.textAreasRow, column=self.leftTextAreaCol, sticky=NSEW)
-        self.leftFileTextArea.config(font=regular_font)
+        self.leftFileTextArea.config(font=self.text_area_font)
         self.leftFileTextArea.config(wrap='none')
 
-        self.rightFileTextArea = TextWithLineNumbers(self.main_window, padx=5, pady=5, width=1, height=1, bg=self.grayColor)
+        self.rightFileTextArea = Text(self.main_window, padx=5, pady=5, width=1, height=1, bg=self.grayColor)
         self.rightFileTextArea.grid(row=self.textAreasRow, column=self.rightTextAreaCol, sticky=NSEW)
-        self.rightFileTextArea.config(font=regular_font)
+        self.rightFileTextArea.config(font=self.text_area_font)
         self.rightFileTextArea.config(wrap='none')
 
         # configuring highlight tags
@@ -121,26 +121,32 @@ class MainWindowUI:
 
     # Line numbers
     def create_line_numbers(self):
-        self.leftLinenumbers = LineNumbersCanvas(self.main_window, width=20)
-        self.leftLinenumbers.attach(self.leftFileTextArea)
+        self.leftLinenumbers = Text(self.main_window, width=3, padx=5, pady=5, height=1, bg=self.lightGrayColor)
         self.leftLinenumbers.grid(row=self.lineNumbersRow, column=self.leftLineNumbersCol, sticky=NS)
-        self.leftFileTextArea.bind('<<Change>>', self.leftLinenumbers.redraw)
-        self.leftFileTextArea.bind('<Configure>', self.leftLinenumbers.redraw)
+        self.leftLinenumbers.config(font=self.text_area_font)
+        self.leftLinenumbers.tag_configure('line', justify='right')
 
-        self.rightLinenumbers = LineNumbersCanvas(self.main_window, width=20)
-        self.rightLinenumbers.attach(self.rightFileTextArea)
+        self.rightLinenumbers = Text(self.main_window, width=3, padx=5, pady=5, height=1, bg=self.lightGrayColor)
         self.rightLinenumbers.grid(row=self.lineNumbersRow, column=self.rightLineNumbersCol, sticky=NS)
-        self.rightFileTextArea.bind('<<Change>>', self.rightLinenumbers.redraw)
-        self.rightFileTextArea.bind('<Configure>', self.rightLinenumbers.redraw)
+        self.rightLinenumbers.config(font=self.text_area_font)
+        self.rightLinenumbers.tag_configure('line', justify='right')
+
+        # disable the line numbers
+        self.leftLinenumbers.config(state=DISABLED)
+        self.rightLinenumbers.config(state=DISABLED)
 
     # Scroll bars
     def scrollBoth(self, action, position, type=None):
         self.leftFileTextArea.yview_moveto(position)
         self.rightFileTextArea.yview_moveto(position)
+        self.leftLinenumbers.yview_moveto(position)
+        self.rightLinenumbers.yview_moveto(position)
 
     def updateScroll(self, first, last, type=None):
         self.leftFileTextArea.yview_moveto(first)
         self.rightFileTextArea.yview_moveto(first)
+        self.leftLinenumbers.yview_moveto(first)
+        self.rightLinenumbers.yview_moveto(first)
         self.uniScrollbar.set(first, last)
 
     def create_scroll_bars(self):
@@ -149,6 +155,8 @@ class MainWindowUI:
         self.uniScrollbar.config(command=self.scrollBoth)
         self.leftFileTextArea.config(yscrollcommand=self.updateScroll)
         self.rightFileTextArea.config(yscrollcommand=self.updateScroll)
+        self.leftLinenumbers.config(yscrollcommand=self.updateScroll)
+        self.rightLinenumbers.config(yscrollcommand=self.updateScroll)
 
         leftHorizontalScrollbar = Scrollbar(self.main_window, orient=HORIZONTAL)
         leftHorizontalScrollbar.grid(row=self.horizontalScrollbarRow, column=self.leftHorizontalScrollbarCol, sticky=EW)

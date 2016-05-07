@@ -165,13 +165,17 @@ class MainWindow:
         # enable text area edits so we can clear and insert into them
         self.main_window_ui.leftFileTextArea.config(state=NORMAL)
         self.main_window_ui.rightFileTextArea.config(state=NORMAL)
+        self.main_window_ui.leftLinenumbers.config(state=NORMAL)
+        self.main_window_ui.rightLinenumbers.config(state=NORMAL)
 
         diff = DifflibParser(leftFileContents.splitlines(), rightFileContents.splitlines())
 
         self.main_window_ui.leftFileTextArea.delete(1.0, END)
         self.main_window_ui.rightFileTextArea.delete(1.0, END)
+        self.main_window_ui.leftLinenumbers.delete(1.0, END)
+        self.main_window_ui.rightLinenumbers.delete(1.0, END)
 
-        lineno = 0
+        lineno = 1
         for line in diff:
             if line['code'] == DiffCode.SIMILAR:
                 self.main_window_ui.leftFileTextArea.insert('end', line['line'] + '\n')
@@ -189,9 +193,19 @@ class MainWindow:
                     self.main_window_ui.rightFileTextArea.insert('end', c, 'darkgreen' if i in line['rightchanges'] else 'green')
                 self.main_window_ui.leftFileTextArea.insert('end', '\n')
                 self.main_window_ui.rightFileTextArea.insert('end', '\n')
+            self.main_window_ui.leftLinenumbers.insert('end', str(lineno) + '\n', 'line')
+            self.main_window_ui.rightLinenumbers.insert('end', str(lineno) + '\n', 'line')
+            lineno += 1
+
+        # calc width of line numbers texts and set it
+        width = len(str(lineno))
+        self.main_window_ui.leftLinenumbers.config(width=width)
+        self.main_window_ui.rightLinenumbers.config(width=width)
 
         self.main_window_ui.leftFileTextArea.config(state=DISABLED)
         self.main_window_ui.rightFileTextArea.config(state=DISABLED)
+        self.main_window_ui.leftLinenumbers.config(state=DISABLED)
+        self.main_window_ui.rightLinenumbers.config(state=DISABLED)
 
     def __cut(self):
         area = self.__getActiveTextArea()
