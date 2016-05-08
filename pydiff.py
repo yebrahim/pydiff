@@ -22,16 +22,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from tkinter import *
+from ui.mainwindow import *
+import argparse, sys
 
-class FileIO:
-    def load_file_to_text_area(self, fname, textArea):
-        textArea.config(state=NORMAL)
-        try:
-            text = open(fname).read()
-            textArea.delete(1.0, END) 
-            textArea.insert(1.0, text)
-        except Exception as e:
-            showerror('Open Source File', 'Failed to read file\n"%s". Error: %s' % (fname, e))
-        finally:
-            textArea.config(state=DISABLED)
+parser = argparse.ArgumentParser(description="pydiff - Tkinter GUI tool based on Python's difflib")
+parser.add_argument('-f', '--files', metavar=('file1', 'file2'), nargs=2, help='Two file paths to compare', required=False)
+
+args = parser.parse_args()
+
+leftfile = args.files[0] if args.files else None
+rightfile = args.files[1] if args.files else None
+
+main_window = MainWindow()
+main_window.start(leftfile, rightfile)
