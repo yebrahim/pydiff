@@ -31,20 +31,17 @@ import os
 class MainWindowUI:
 
     # Rows
-    browseButtonsRow = 0
-    fileTreeRow = filePathLabelsRow = 1
-    uniScrollbarRow = lineNumbersRow = textAreasRow = 2
-    horizontalScrollbarRow = 3
+    fileTreeRow = filePathLabelsRow = 0
+    uniScrollbarRow = lineNumbersRow = textAreasRow = 1
+    horizontalScrollbarRow = 2
 
     # Columns
     fileTreeCol = 0
     fileTreeScrollbarCol = 1
-    leftLineNumbersCol = 2
-    leftBrowseButtonsCol = leftFilePathLabelsCol = 2    # should span at least two columns
+    leftLineNumbersCol = leftFilePathLabelsCol = 2    # should span at least two columns
     leftTextAreaCol = leftHorizontalScrollbarCol = 3
     uniScrollbarCol = 4
-    rightLineNumbersCol = 5
-    rightBrowseButtonsCol = rightFilePathLabelsCol = 6  # should span at least two columns
+    rightLineNumbersCol = rightFilePathLabelsCol = 5  # should span at least two columns
     rightTextAreaCol = rightHorizontalScrollbarCol = 6
 
     # Colors
@@ -61,10 +58,14 @@ class MainWindowUI:
         self.main_window = window
         self.main_window.grid_rowconfigure(self.filePathLabelsRow, weight=0)
         self.main_window.grid_rowconfigure(self.textAreasRow, weight=1)
-        self.main_window.grid_columnconfigure(self.leftTextAreaCol, weight=1)
-        self.main_window.grid_columnconfigure(self.rightTextAreaCol, weight=1)
+
+        self.main_window.grid_columnconfigure(self.fileTreeCol, weight=0)
+        self.main_window.grid_columnconfigure(self.fileTreeScrollbarCol, weight=0)
         self.main_window.grid_columnconfigure(self.leftLineNumbersCol, weight=0)
+        self.main_window.grid_columnconfigure(self.leftTextAreaCol, weight=1)
+        self.main_window.grid_columnconfigure(self.uniScrollbarCol, weight=0)
         self.main_window.grid_columnconfigure(self.rightLineNumbersCol, weight=0)
+        self.main_window.grid_columnconfigure(self.rightTextAreaCol, weight=1)
         self.menubar = Menu(self.main_window)
         self.menus = {}
         self.text_area_font = Font(family='Consolas', size=10)
@@ -90,18 +91,11 @@ class MainWindowUI:
         self.menubar.add_cascade(label=menuName, menu=self.menus[menuName])
         self.main_window.config(menu=self.menubar)
 
-    # Buttons
-    def create_browse_buttons(self, leftLoadButtonCallback, rightLoadButtonCallback):
-        self.leftFileButton = Button(self.main_window, text='Browse', command=leftLoadButtonCallback, width=10)
-        self.leftFileButton.grid(row=self.browseButtonsRow, column=self.leftBrowseButtonsCol, sticky=W, columnspan=2)
-        self.rightFileButton = Button(self.main_window, text='Browse', command=rightLoadButtonCallback, width=10)
-        self.rightFileButton.grid(row=self.browseButtonsRow, column=self.rightBrowseButtonsCol, sticky=W, columnspan=2)
-
     # Labels
     def create_file_path_labels(self):
-        self.leftFileLabel = Label(self.main_window)
+        self.leftFileLabel = Label(self.main_window, anchor='center', width=1000)
         self.leftFileLabel.grid(row=self.filePathLabelsRow, column=self.leftFilePathLabelsCol, columnspan=2)
-        self.rightFileLabel = Label(self.main_window)
+        self.rightFileLabel = Label(self.main_window, anchor='center', width=1000)
         self.rightFileLabel.grid(row=self.filePathLabelsRow, column=self.rightFilePathLabelsCol, columnspan=2)
 
     # File treeview
