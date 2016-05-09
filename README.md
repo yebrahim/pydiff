@@ -7,4 +7,6 @@ An open source Tkinter GUI for python's difflib comparing two text files or two 
 
 You can open File -> Compare Files to diff two text files, or choose File -> Compare Directories to diff directories. In the case of directories, the tool will show the directory structure in a tree sidebar to the left, and highlight files red if they're in left directory only, green if in the right one only, yellow if in both with changes, and white if in both with no changes.
 
+The tool makes use of [this parser](https://github.com/yebrahim/difflibparser) that I wrote for python's difflib ndiff output, which converts the text output into diff objects that can be used in code.
+
 Please open issues if you see any, and feel free to fix and send pull requests.
