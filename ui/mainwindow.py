@@ -42,6 +42,7 @@ class MainWindow:
         self.__main_window_ui.center_window()
         self.__main_window_ui.create_file_path_labels()
         self.__main_window_ui.create_text_areas()
+        self.__main_window_ui.create_search_text_entry(self.__findNext)
         self.__main_window_ui.create_line_numbers()
         self.__main_window_ui.create_scroll_bars()
         self.__main_window_ui.create_file_treeview()
@@ -50,9 +51,11 @@ class MainWindow:
             {'name': 'Compare Files', 'command': self.__browse_files},
             {'name': 'Compare Directories', 'command': self.__browse_directories},
             {'separator'},
-            {'name': 'Exit', 'command': self.exit}
+            {'name': 'Exit', 'command': self.__exit}
             ])
         self.__main_window_ui.add_menu('Edit', [
+            {'name': 'Find', 'command': self.__startFindText},
+            {'separator'},
             {'name': 'Cut', 'command': self.__cut},
             {'name': 'Copy', 'command': self.__copy},
             {'name': 'Paste', 'command': self.__paste}
@@ -62,7 +65,14 @@ class MainWindow:
         self.leftFile.set(leftFile if leftFile else '')
         self.rightFile.set(rightFile if rightFile else '')
 
+        self.__bind_key_shortcuts()
+
         self.main_window.mainloop()
+
+    def __bind_key_shortcuts(self):
+        self.main_window.bind('<Control-f>', lambda *x: self.__startFindText())
+        self.main_window.bind('<Escape>', lambda *x: self.__endFindText())
+        self.main_window.bind('<F3>', self.__main_window_ui.searchTextDialog.nextResult)
 
     def __browse_files(self):
         self.__load_file('left')
@@ -243,7 +253,28 @@ class MainWindow:
         else:
             return None
 
-    def exit(self):
+    def __startFindText(self):
+        self.__main_window_ui.searchTextDialog.grid()
+        self.__main_window_ui.searchTextDialog.focus()
+
+    def __endFindText(self):
+        self.__main_window_ui.leftFileTextArea.tag_remove('search', 1.0, END)
+        self.__main_window_ui.rightFileTextArea.tag_remove('search', 1.0, END)
+        self.__main_window_ui.searchTextDialog.unfocus()
+        self.__main_window_ui.searchTextDialog.grid_remove()
+
+    def __findNext(self, searchresult):
+        term,leftpos,rightpos = searchresult['term'], searchresult['indices'][0], searchresult['indices'][1]
+        if leftpos != -1:
+            self.__main_window_ui.leftFileTextArea.tag_remove('search', 1.0, END)
+            self.__main_window_ui.leftFileTextArea.tag_add('search', leftpos, '%s + %sc' % (leftpos, len(term)))
+            # scroll to position plus five lines for visibility
+            self.__main_window_ui.leftFileTextArea.see(float(leftpos) + 5)
+        if rightpos != -1:
+            self.__main_window_ui.rightFileTextArea.tag_remove('search', 1.0, END)
+            self.__main_window_ui.rightFileTextArea.tag_add('search', rightpos, '%s + %sc' % (rightpos, len(term)))
+            # scroll to position plus five lines for visibility
+            self.__main_window_ui.rightFileTextArea.see(float(rightpos) + 5)
+
+    def __exit(self):
         self.main_window.destroy()
-
-

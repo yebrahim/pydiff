@@ -27,13 +27,34 @@ from tkinter.ttk import *
 from tkinter.messagebox import showerror
 from tkinter.font import Font
 import os
+from ui.searchtextdialog import *
 
 class MainWindowUI:
 
+# |   1   |   2   |   3   |   4   |   5   |   6   |   7   |   8   |   9   |  10   |  11   |  12   |
+# +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+# |                                     menu bar                                                  |
+# +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+# |               |                                     search bar                                |
+# |               |          search entry                                                 | button|
+# |               +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+# |               |                                       |                                       |
+# |               |                                       |                                       |
+# |               |                                       |                                       |
+# |   treeview    |                                       |                                       |
+# |               |              text area 1              |               text area 2             |
+# |               |                                       |                                       |
+# |               |                                       |                                       |
+# |               |                                       |                                       |
+# |               |                                       |                                       |
+# +-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+-------+
+# |   1   |   2   |   3   |   4   |   5   |   6   |   7   |   8   |   9   |  10   |  11   |  12   |
+
     # Rows
     fileTreeRow = filePathLabelsRow = 0
-    uniScrollbarRow = lineNumbersRow = textAreasRow = 1
-    horizontalScrollbarRow = 2
+    searchTextRow = 1
+    uniScrollbarRow = lineNumbersRow = textAreasRow = 2
+    horizontalScrollbarRow = 3
 
     # Columns
     fileTreeCol = 0
@@ -53,10 +74,12 @@ class MainWindowUI:
     greenColor = '#94ffaf'
     darkgreenColor = '#269141'
     yellowColor = '#f0f58c'
+    darkYellowColor = '#ffff00'
 
     def __init__(self, window):
         self.main_window = window
         self.main_window.grid_rowconfigure(self.filePathLabelsRow, weight=0)
+        self.main_window.grid_rowconfigure(self.searchTextRow, weight=0)
         self.main_window.grid_rowconfigure(self.textAreasRow, weight=1)
 
         self.main_window.grid_columnconfigure(self.fileTreeCol, weight=0)
@@ -98,6 +121,13 @@ class MainWindowUI:
         self.rightFileLabel = Label(self.main_window, anchor='center', width=1000)
         self.rightFileLabel.grid(row=self.filePathLabelsRow, column=self.rightFilePathLabelsCol, columnspan=2)
 
+    # Search text entnry
+    def create_search_text_entry(self, searchButtonCallback):
+        self.searchTextDialog = SearchTextDialog(self.main_window, [self.leftFileTextArea, self.rightFileTextArea], searchButtonCallback)
+        self.searchTextDialog.grid(row=self.searchTextRow, columnspan=10, sticky=EW)
+
+        self.searchTextDialog.grid_remove()
+
     # File treeview
     def create_file_treeview(self):
         self.fileTreeView = Treeview(self.main_window)
@@ -105,8 +135,8 @@ class MainWindowUI:
         self.fileTreeXScrollbar = Scrollbar(self.main_window, orient='horizontal', command=self.fileTreeView.xview)
         self.fileTreeView.configure(yscroll=self.fileTreeYScrollbar.set, xscroll=self.fileTreeXScrollbar.set)
 
-        self.fileTreeView.grid(row=self.fileTreeRow, column=self.fileTreeCol, sticky=NS, rowspan=2)
-        self.fileTreeYScrollbar.grid(row=self.fileTreeRow, column=self.fileTreeScrollbarCol, sticky=NS, rowspan=2)
+        self.fileTreeView.grid(row=self.fileTreeRow, column=self.fileTreeCol, sticky=NS, rowspan=3)
+        self.fileTreeYScrollbar.grid(row=self.fileTreeRow, column=self.fileTreeScrollbarCol, sticky=NS, rowspan=3)
         self.fileTreeXScrollbar.grid(row=self.horizontalScrollbarRow, column=self.fileTreeCol, sticky=EW)
 
         self.fileTreeView.tag_configure('red', background=self.redColor)
@@ -134,9 +164,11 @@ class MainWindowUI:
         self.leftFileTextArea.tag_configure('red', background=self.redColor)
         self.leftFileTextArea.tag_configure('darkred', background=self.darkredColor)
         self.leftFileTextArea.tag_configure('gray', background=self.grayColor)
+        self.leftFileTextArea.tag_configure('search', background=self.darkYellowColor)
         self.rightFileTextArea.tag_configure('green', background=self.greenColor)
         self.rightFileTextArea.tag_configure('darkgreen', background=self.darkgreenColor)
         self.rightFileTextArea.tag_configure('gray', background=self.grayColor)
+        self.rightFileTextArea.tag_configure('search', background=self.darkYellowColor)
 
         # disable the text areas
         self.leftFileTextArea.config(state=DISABLED)
