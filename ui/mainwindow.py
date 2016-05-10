@@ -197,7 +197,7 @@ class MainWindow:
         self.__main_window_ui.leftLinenumbers.delete(1.0, END)
         self.__main_window_ui.rightLinenumbers.delete(1.0, END)
 
-        lineno = 1
+        leftlineno = rightlineno = 1
         for line in diff:
             if line['code'] == DiffCode.SIMILAR:
                 self.__main_window_ui.leftFileTextArea.insert('end', line['line'] + '\n')
@@ -215,14 +215,24 @@ class MainWindow:
                     self.__main_window_ui.rightFileTextArea.insert('end', c, 'darkgreen' if i in line['rightchanges'] else 'green')
                 self.__main_window_ui.leftFileTextArea.insert('end', '\n')
                 self.__main_window_ui.rightFileTextArea.insert('end', '\n')
-            self.__main_window_ui.leftLinenumbers.insert('end', str(lineno) + '\n', 'line')
-            self.__main_window_ui.rightLinenumbers.insert('end', str(lineno) + '\n', 'line')
-            lineno += 1
+
+            if line['code'] == DiffCode.LEFTONLY:
+                self.__main_window_ui.leftLinenumbers.insert('end', str(leftlineno) + '\n', 'line')
+                self.__main_window_ui.rightLinenumbers.insert('end', '\n', 'line')
+                leftlineno += 1
+            elif line['code'] == DiffCode.RIGHTONLY:
+                self.__main_window_ui.leftLinenumbers.insert('end', '\n', 'line')
+                self.__main_window_ui.rightLinenumbers.insert('end', str(rightlineno) + '\n', 'line')
+                rightlineno += 1
+            else:
+                self.__main_window_ui.leftLinenumbers.insert('end', str(leftlineno) + '\n', 'line')
+                self.__main_window_ui.rightLinenumbers.insert('end', str(rightlineno) + '\n', 'line')
+                leftlineno += 1
+                rightlineno += 1
 
         # calc width of line numbers texts and set it
-        width = len(str(lineno))
-        self.__main_window_ui.leftLinenumbers.config(width=width)
-        self.__main_window_ui.rightLinenumbers.config(width=width)
+        self.__main_window_ui.leftLinenumbers.config(width=len(str(leftlineno)))
+        self.__main_window_ui.rightLinenumbers.config(width=len(str(rightlineno)))
 
         # disable text areas to prevent further editing
         self.__main_window_ui.leftFileTextArea.config(state=DISABLED)
