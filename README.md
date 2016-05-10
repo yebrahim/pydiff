@@ -1,5 +1,5 @@
 # pydiff - An Open Source Python Difflib GUI
-An open source Tkinter GUI for python's difflib comparing two text files or two directories, complete with highlighting of differences and line numbers.
+An open source Tkinter GUI for python's difflib comparing two text files or two directory trees, complete with highlighting of differences and line numbers.
 
 <p align="center">
   <img src="https://github.com/yebrahim/python-difflib-gui/blob/master/screenshot.png" width="90%"/>
