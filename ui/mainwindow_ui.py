@@ -111,7 +111,7 @@ class MainWindowUI:
         self.menus[menuName] = Menu(self.menubar,tearoff=0)
         for c in commandList:
             if 'separator' in c: self.menus[menuName].add_separator()
-            else: self.menus[menuName].add_command(label=c['name'], command=c['command'])
+            else: self.menus[menuName].add_command(label=c['name'], command=c['command'], accelerator=c['accelerator'] if 'accelerator' in c else '')
         self.menubar.add_cascade(label=menuName, menu=self.menus[menuName])
         self.main_window.config(menu=self.menubar)
 

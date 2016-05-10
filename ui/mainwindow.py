@@ -51,14 +51,14 @@ class MainWindow:
             {'name': 'Compare Files', 'command': self.__browse_files},
             {'name': 'Compare Directories', 'command': self.__browse_directories},
             {'separator'},
-            {'name': 'Exit', 'command': self.__exit}
+            {'name': 'Exit', 'command': self.__exit, 'accelerator': 'Alt+F4'}
             ])
         self.__main_window_ui.add_menu('Edit', [
-            {'name': 'Find', 'command': self.__startFindText},
+            {'name': 'Find', 'command': self.__startFindText, 'accelerator': 'Ctrl+F'},
             {'separator'},
-            {'name': 'Cut', 'command': self.__cut},
-            {'name': 'Copy', 'command': self.__copy},
-            {'name': 'Paste', 'command': self.__paste}
+            {'name': 'Cut', 'command': self.__cut, 'accelerator': 'Ctrl+X'},
+            {'name': 'Copy', 'command': self.__copy, 'accelerator': 'Ctrl+C'},
+            {'name': 'Paste', 'command': self.__paste, 'accelerator': 'Ctrl+P'}
             ])
         self.__main_window_ui.fileTreeView.bind('<<TreeviewSelect>>', lambda *x:self.__treeViewItemSelected())
 
