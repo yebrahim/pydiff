@@ -104,6 +104,7 @@ class MainWindowUI:
         x = (sw - w)/2
         y = (sh - h)/2
         self.main_window.geometry('%dx%d+%d+%d' % (w, h, x, y))
+        self.main_window.minsize(int(0.3 * sw), int(0.3 * sh))
 
     # Menu bar
     def add_menu(self, menuName, commandList):
