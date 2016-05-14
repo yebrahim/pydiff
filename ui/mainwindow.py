@@ -27,11 +27,12 @@ from difflibparser.difflibparser import *
 from ui.mainwindow_ui import MainWindowUI
 from tkinter import *
 from tkinter.filedialog import askopenfilename, askdirectory
+from tkinter.simpledialog import askstring
 
 class MainWindow:
     def start(self, leftFile = None, rightFile = None):
         self.main_window = Tk()
-        self.main_window.title('Difftools')
+        self.main_window.title('Pydiff')
         self.__main_window_ui = MainWindowUI(self.main_window)
 
         self.leftFile = StringVar()
@@ -58,7 +59,9 @@ class MainWindow:
             {'separator'},
             {'name': 'Cut', 'command': self.__cut, 'accelerator': 'Ctrl+X'},
             {'name': 'Copy', 'command': self.__copy, 'accelerator': 'Ctrl+C'},
-            {'name': 'Paste', 'command': self.__paste, 'accelerator': 'Ctrl+P'}
+            {'name': 'Paste', 'command': self.__paste, 'accelerator': 'Ctrl+P'},
+            {'separator'},
+            {'name': 'Go To Line', 'command': self.__goToLine, 'accelerator': 'Ctrl+G'}
             ])
         self.__main_window_ui.fileTreeView.bind('<<TreeviewSelect>>', lambda *x:self.__treeViewItemSelected())
 
@@ -71,6 +74,7 @@ class MainWindow:
 
     def __bind_key_shortcuts(self):
         self.main_window.bind('<Control-f>', lambda *x: self.__startFindText())
+        self.main_window.bind('<Control-g>', lambda *x: self.__goToLine())
         self.main_window.bind('<Escape>', lambda *x: self.__endFindText())
         self.main_window.bind('<F3>', self.__main_window_ui.searchTextDialog.nextResult)
 
@@ -262,6 +266,16 @@ class MainWindow:
             return self.__main_window_ui.rightFileTextArea
         else:
             return None
+
+    def __goToLine(self):
+        line = askstring('Go to line', 'Enter line number:')
+        if line:
+            try:
+                linenumber = int(line)
+                print('line:',linenumber)
+                self.__main_window_ui.leftFileTextArea.see(float(linenumber) + 5)
+            except:
+                pass
 
     def __startFindText(self):
         self.__main_window_ui.searchTextDialog.grid()
