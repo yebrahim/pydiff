@@ -9,4 +9,9 @@ You can open File -> Compare Files to diff two text files, or choose File -> Com
 
 The tool makes use of [this parser](https://github.com/yebrahim/difflibparser) that I wrote for python's difflib ndiff output, which converts the text output into diff objects that can be used in code.
 
+## Install
+You can just clone the repo to your disk, just note that it uses a submodule, so you need to clone recursively:
+
+`git clone --recursive https://github.com/yebrahim/pydiff.git`
+
 Please open issues if you see any, and feel free to fix and send pull requests.
