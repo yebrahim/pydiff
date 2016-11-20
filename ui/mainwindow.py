@@ -35,10 +35,8 @@ class MainWindow:
         self.main_window.title('Pydiff')
         self.__main_window_ui = MainWindowUI(self.main_window)
 
-        self.leftFile = StringVar()
-        self.rightFile = StringVar()
-        self.leftFile.trace('w', lambda *x:self.__filesChanged())
-        self.rightFile.trace('w', lambda *x:self.__filesChanged())
+        self.leftFile = ''
+        self.rightFile = ''
 
         self.__main_window_ui.center_window()
         self.__main_window_ui.create_file_path_labels()
@@ -63,13 +61,14 @@ class MainWindow:
             {'separator'},
             {'name': 'Go To Line', 'command': self.__goToLine, 'accelerator': 'Ctrl+G'}
             ])
-        self.__main_window_ui.fileTreeView.bind('<<TreeviewSelect>>', lambda *x:self.__treeViewItemSelected())
+        self.__main_window_ui.fileTreeView.bind('<<TreeviewSelect>>', lambda *x:self.treeViewItemSelected())
 
         if os.path.isdir(leftpath) or os.path.isdir(rightpath):
             self.__load_directories(leftpath, rightpath)
         else:
-            self.leftFile.set(leftpath if leftpath else '')
-            self.rightFile.set(rightpath if rightpath else '')
+            self.leftFile = leftpath if leftpath else ''
+            self.rightFile = rightpath if rightpath else ''
+            self.filesChanged()
 
         self.__bind_key_shortcuts()
 
@@ -84,6 +83,7 @@ class MainWindow:
     def __browse_files(self):
         self.__load_file('left')
         self.__load_file('right')
+        self.filesChanged()
         self.__main_window_ui.fileTreeView.grid_remove()
         self.__main_window_ui.fileTreeYScrollbar.grid_remove()
         self.__main_window_ui.fileTreeXScrollbar.grid_remove()
@@ -144,9 +144,9 @@ class MainWindow:
         fname = askopenfilename()
         if fname:
             if pos == 'left':
-                self.leftFile.set(fname)
+                self.leftFile = fname
             else:
-                self.rightFile.set(fname)
+                self.rightFile = fname
             return fname
         else:
             return None
@@ -163,37 +163,50 @@ class MainWindow:
             return None
 
     # Callback for changing a file path
-    def __filesChanged(self):
+    def filesChanged(self):
         self.__main_window_ui.leftLinenumbers.grid_remove()
         self.__main_window_ui.rightLinenumbers.grid_remove()
-        if self.leftFile.get() == None or self.rightFile.get() == None:
+
+        if not self.leftFile or not self.rightFile:
             self.__main_window_ui.leftFileTextArea.config(background=self.__main_window_ui.grayColor)
             self.__main_window_ui.rightFileTextArea.config(background=self.__main_window_ui.grayColor)
             return
 
-        if not os.path.exists(self.leftFile.get()) or not os.path.exists(self.rightFile.get()):
-            return
+        if os.path.exists(self.leftFile):
+            self.__main_window_ui.leftFileLabel.config(text=self.leftFile)
+            self.__main_window_ui.leftFileTextArea.config(background=self.__main_window_ui.whiteColor)
+            self.__main_window_ui.leftLinenumbers.grid()
+        else:
+            self.__main_window_ui.leftFileLabel.config(text='')
 
-        self.__main_window_ui.leftFileLabel.config(text=self.leftFile.get())
-        self.__main_window_ui.rightFileLabel.config(text=self.rightFile.get())
-        self.__main_window_ui.leftFileTextArea.config(background=self.__main_window_ui.whiteColor)
-        self.__main_window_ui.rightFileTextArea.config(background=self.__main_window_ui.whiteColor)
-        self.__main_window_ui.leftLinenumbers.grid()
-        self.__main_window_ui.rightLinenumbers.grid()
-        self.__diff_files_into_text_areas()
+        if os.path.exists(self.rightFile):
+            self.__main_window_ui.rightFileLabel.config(text=self.rightFile)
+            self.__main_window_ui.rightFileTextArea.config(background=self.__main_window_ui.whiteColor)
+            self.__main_window_ui.rightLinenumbers.grid()
+        else:
+            self.__main_window_ui.rightFileLabel.config(text='')
 
-    def __treeViewItemSelected(self):
+        self.diff_files_into_text_areas()
+
+    def treeViewItemSelected(self):
         item_id = self.__main_window_ui.fileTreeView.focus()
         paths = self.__main_window_ui.fileTreeView.item(item_id)['values']
         if paths == None or len(paths) == 0:
             return
-        self.leftFile.set(paths[0])
-        self.rightFile.set(paths[1])
+        self.leftFile = paths[0]
+        self.rightFile = paths[1]
+        self.filesChanged()
 
     # Insert file contents into text areas and highlight differences
-    def __diff_files_into_text_areas(self):
-        leftFileContents = open(self.leftFile.get()).read()
-        rightFileContents = open(self.rightFile.get()).read()
+    def diff_files_into_text_areas(self):
+        try:
+            leftFileContents = open(self.leftFile).read()
+        except:
+            leftFileContents = ''
+        try:
+            rightFileContents = open(self.rightFile).read()
+        except:
+            rightFileContents = ''
 
         diff = DifflibParser(leftFileContents.splitlines(), rightFileContents.splitlines())
 
