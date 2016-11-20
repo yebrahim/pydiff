@@ -17,7 +17,15 @@ You can just clone the repo to your disk, just note that it uses a submodule, so
 Please open issues if you see any, and feel free to fix and send pull requests.
 
 ## Usage
-`python pydiff`
 
-To diff two files directly:
-`python pydiff -f file1 file2`
+`python pydiff.py`
+
+You can also give it executable permissions and run it directly on unix systems:
+
+`chmod +x pydiff.py`
+
+`./pydiff.py`
+
+To diff two paths directly (files or directories):
+
+`python pydiff.py -p path1 path2`
