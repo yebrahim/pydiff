@@ -22,10 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from tkinter import *
-from tkinter.ttk import *
-from tkinter.messagebox import showerror
-from tkinter.font import Font
+from Tkinter import *
+#from Tkinter.ttk import *
+from tkMessageBox import showerror
+from tkFont import Font
+import ttk
+from ttk import Treeview
 import os
 from ui.searchtextdialog import *
 
@@ -67,12 +69,12 @@ class MainWindowUI:
 
     # Colors
     whiteColor = '#ffffff'
-    redColor = '#ff9494'
-    darkredColor = '#ff0000'
-    grayColor = '#cccccc'
+    redColor = '#ffc4c4'
+    darkredColor = '#ff8282'
+    grayColor = '#dddddd'
     lightGrayColor = '#eeeeee'
-    greenColor = '#94ffaf'
-    darkgreenColor = '#269141'
+    greenColor = '#c9fcd6'
+    darkgreenColor = '#50c96e'
     yellowColor = '#f0f58c'
     darkYellowColor = '#ffff00'
 
@@ -91,7 +93,7 @@ class MainWindowUI:
         self.main_window.grid_columnconfigure(self.rightTextAreaCol, weight=1)
         self.menubar = Menu(self.main_window)
         self.menus = {}
-        self.text_area_font = Font(family='Consolas', size=10)
+        self.text_area_font = 'TkFixedFont'
 
     # Center window and set its size
     def center_window(self):
@@ -117,9 +119,9 @@ class MainWindowUI:
 
     # Labels
     def create_file_path_labels(self):
-        self.leftFileLabel = Label(self.main_window, anchor='center', width=1000)
+        self.leftFileLabel = Label(self.main_window, anchor='center', width=1000, background=self.lightGrayColor)
         self.leftFileLabel.grid(row=self.filePathLabelsRow, column=self.leftFilePathLabelsCol, columnspan=2)
-        self.rightFileLabel = Label(self.main_window, anchor='center', width=1000)
+        self.rightFileLabel = Label(self.main_window, anchor='center', width=1000, background=self.lightGrayColor)
         self.rightFileLabel.grid(row=self.filePathLabelsRow, column=self.rightFilePathLabelsCol, columnspan=2)
 
     # Search text entnry

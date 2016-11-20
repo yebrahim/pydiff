@@ -22,8 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from tkinter import *
-from tkinter.ttk import *
+from Tkinter import *
 
 class SearchTextDialog(Frame):
 
@@ -46,10 +45,10 @@ class SearchTextDialog(Frame):
         self.__matchCaseVar.set(0)
         self.searchTextCheckbutton = Checkbutton(self, text='Match case', variable=self.__matchCaseVar, command=lambda *x: self.clearSearch())
         self.searchTextCheckbutton.pack(side=LEFT, padx=10)
-        
+
         self.searchTextButton = Button(self, text='Find', command=self.nextResult)
         self.searchTextButton.pack(side=LEFT)
-        
+
         self.searchTextEntry.bind('<Return>', self.nextResult)
         self.searchTextButton.bind('<Return>', self.nextResult)
         self.__curSearchResult = {'term': None, 'indices': ['0.0'] * len(self.__textwidgets)}

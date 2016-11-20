@@ -25,9 +25,9 @@ SOFTWARE.
 import os, mimetypes, filecmp
 from difflibparser.difflibparser import *
 from ui.mainwindow_ui import MainWindowUI
-from tkinter import *
-from tkinter.filedialog import askopenfilename, askdirectory
-from tkinter.simpledialog import askstring
+from Tkinter import *
+from tkFileDialog import askopenfilename, askdirectory
+from tkSimpleDialog import askstring
 
 class MainWindow:
     def start(self, leftFile = None, rightFile = None):
@@ -272,7 +272,6 @@ class MainWindow:
         if line:
             try:
                 linenumber = int(line)
-                print('line:',linenumber)
                 self.__main_window_ui.leftFileTextArea.see(float(linenumber) + 5)
             except:
                 pass
