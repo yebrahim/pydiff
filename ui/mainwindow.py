@@ -30,7 +30,7 @@ from tkFileDialog import askopenfilename, askdirectory
 from tkSimpleDialog import askstring
 
 class MainWindow:
-    def start(self, leftFile = None, rightFile = None):
+    def start(self, leftpath = None, rightpath = None):
         self.main_window = Tk()
         self.main_window.title('Pydiff')
         self.__main_window_ui = MainWindowUI(self.main_window)
@@ -65,8 +65,11 @@ class MainWindow:
             ])
         self.__main_window_ui.fileTreeView.bind('<<TreeviewSelect>>', lambda *x:self.__treeViewItemSelected())
 
-        self.leftFile.set(leftFile if leftFile else '')
-        self.rightFile.set(rightFile if rightFile else '')
+        if os.path.isdir(leftpath) or os.path.isdir(rightpath):
+            self.__load_directories(leftpath, rightpath)
+        else:
+            self.leftFile.set(leftpath if leftpath else '')
+            self.rightFile.set(rightpath if rightpath else '')
 
         self.__bind_key_shortcuts()
 
@@ -89,6 +92,9 @@ class MainWindow:
     def __browse_directories(self):
         leftDir = self.__load_directory('left')
         rightDir = self.__load_directory('right')
+        self.__load_directories(leftDir, rightDir)
+
+    def __load_directories(self, leftDir, rightDir):
         if leftDir and rightDir:
             self.__main_window_ui.fileTreeView.grid()
             self.__main_window_ui.fileTreeYScrollbar.grid()
@@ -99,6 +105,8 @@ class MainWindow:
     # Recursive method to fill the treevie with given directory hierarchy
     def __browse_process_directory(self, parent, leftPath, rightPath):
         if parent == '':
+            leftPath = leftPath.rstrip('/')
+            rightPath = rightPath.rstrip('/')
             leftDirName = os.path.basename(leftPath)
             rightDirName = os.path.basename(rightPath)
             self.__main_window_ui.fileTreeView.heading('#0', text=leftDirName + ' / ' + rightDirName, anchor=W)

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 MIT License
 
@@ -26,12 +27,12 @@ from ui.mainwindow import *
 import argparse, sys
 
 parser = argparse.ArgumentParser(description="pydiff - Tkinter GUI tool based on Python's difflib")
-parser.add_argument('-f', '--files', metavar=('file1', 'file2'), nargs=2, help='Two file paths to compare', required=False)
+parser.add_argument('-p', '--paths', metavar=('path1', 'path2'), nargs=2, help='Two paths to compare', required=False)
 
 args = parser.parse_args()
 
-leftfile = args.files[0] if args.files else None
-rightfile = args.files[1] if args.files else None
+leftpath = args.paths[0] if args.paths else None
+rightpath = args.paths[1] if args.paths else None
 
 main_window = MainWindow()
-main_window.start(leftfile, rightfile)
+main_window.start(leftpath, rightpath)
