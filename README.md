@@ -15,3 +15,9 @@ You can just clone the repo to your disk, just note that it uses a submodule, so
 `git clone --recursive https://github.com/yebrahim/pydiff.git`
 
 Please open issues if you see any, and feel free to fix and send pull requests.
+
+## Usage
+`python pydiff`
+
+To diff two files directly:
+`python pydiff -f file1 file2`
