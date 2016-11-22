@@ -9,6 +9,9 @@ You can open File -> Compare Files to diff two text files, or choose File -> Com
 
 The tool makes use of [this parser](https://github.com/yebrahim/difflibparser) that I wrote for python's difflib ndiff output, which converts the text output into diff objects that can be used in code.
 
+## Requirements
+pydiff works with stock Python2.7 and takes only one dependency on `tkinter`, which is built-in on MacOS so it should work out of the box. On Ubuntu, you can get it by running `sudo apt-get install python-tk`.
+
 ## Install
 You can just clone the repo to your disk, just note that it uses a submodule, so you need to clone recursively:
 
