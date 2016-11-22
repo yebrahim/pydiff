@@ -63,7 +63,7 @@ class MainWindow:
             ])
         self.__main_window_ui.fileTreeView.bind('<<TreeviewSelect>>', lambda *x:self.treeViewItemSelected())
 
-        if os.path.isdir(leftpath) or os.path.isdir(rightpath):
+        if (leftpath and os.path.isdir(leftpath)) or (rightpath and os.path.isdir(rightpath)):
             self.__load_directories(leftpath, rightpath)
         else:
             self.leftFile = leftpath if leftpath else ''
