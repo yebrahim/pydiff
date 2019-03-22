@@ -22,7 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from Tkinter import *
+try:    # for Python2
+    from Tkinter import *
+except ImportError:    # for Python3
+    from tkinter import *
 
 class SearchTextDialog(Frame):
 

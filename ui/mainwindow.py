@@ -25,9 +25,14 @@ SOFTWARE.
 import os, mimetypes, filecmp
 from difflibparser.difflibparser import *
 from ui.mainwindow_ui import MainWindowUI
-from Tkinter import *
-from tkFileDialog import askopenfilename, askdirectory
-from tkSimpleDialog import askstring
+try:    # for Python2
+    from Tkinter import *
+    from tkFileDialog import askopenfilename, askdirectory
+    from tkSimpleDialog import askstring
+except ImportError:    # for Python3
+    from tkinter import *
+    from tkinter.filedialog import askopenfilename, askdirectory
+    from tkinter.simpledialog import askstring
 
 class MainWindow:
     def start(self, leftpath = None, rightpath = None):

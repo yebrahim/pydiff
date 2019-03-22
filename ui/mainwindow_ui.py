@@ -22,12 +22,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from Tkinter import *
-#from Tkinter.ttk import *
-from tkMessageBox import showerror
-from tkFont import Font
-import ttk
-from ttk import Treeview
+try:    # for Python2
+    from Tkinter import *
+    from tkMessageBox import showerror
+    from tkFont import Font
+    import ttk
+    from ttk import Treeview
+except ImportError:    # for Python3
+    from tkinter import *
+    from tkinter.messagebox import showerror
+    from tkinter import font
+    from tkinter import ttk
+    from tkinter.ttk import Treeview
 import os
 from ui.searchtextdialog import *
 
