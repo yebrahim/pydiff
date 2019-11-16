@@ -118,6 +118,7 @@ class MainWindow:
         leftListing = os.listdir(leftPath)
         rightListing = os.listdir(rightPath)
         mergedListing = list(set(leftListing) | set(rightListing))
+        painted = FALSE
         for l in mergedListing:
             newLeftPath = leftPath + '/' + l
             newRightPath = rightPath + '/' + l
@@ -125,25 +126,32 @@ class MainWindow:
             # Item in left dir only
             if l in leftListing and l not in rightListing:
                 self.__main_window_ui.fileTreeView.insert(parent, 'end', text=l, value=bindValue, open=False, tags=('red','simple'))
+                painted = TRUE
             # Item in right dir only
             elif l in rightListing and l not in leftListing:
                 self.__main_window_ui.fileTreeView.insert(parent, 'end', text=l, value=bindValue, open=False, tags=('green','simple'))
+                painted = TRUE
             # Item in both dirs
             else:
                 # If one of the diffed items is a file and the other is a directory, show in yellow indicating a difference
                 if (not os.path.isdir(newLeftPath) and os.path.isdir(newRightPath)) or (os.path.isdir(newLeftPath) and not os.path.isdir(newRightPath)):
                     self.__main_window_ui.fileTreeView.insert(parent, 'end', text=l, value=bindValue, open=False, tags=('yellow','simple'))
+                    painted = TRUE
                 else:
                     # If both are directories, show in white and recurse on contents
                     if os.path.isdir(newLeftPath) and os.path.isdir(newRightPath):
                         oid = self.__main_window_ui.fileTreeView.insert(parent, 'end', text=l, open=False)
-                        self.__browse_process_directory(oid, newLeftPath, newRightPath)
+                        painted = self.__browse_process_directory(oid, newLeftPath, newRightPath)
+                        if painted:
+                            self.__main_window_ui.fileTreeView.item(oid, tags=('purpleLight', 'simple'))
                     else:
                         # Both are files. diff the two files to either show them in white or yellow
                         if (filecmp.cmp(newLeftPath, newRightPath)):
                             oid = self.__main_window_ui.fileTreeView.insert(parent, 'end', text=l, value=bindValue, open=False, tags=('simple'))
                         else:
                             oid = self.__main_window_ui.fileTreeView.insert(parent, 'end', text=l, value=bindValue, open=False, tags=('yellow','simple'))
+                            painted = TRUE
+        return painted
 
     def __load_file(self, pos):
         fname = askopenfilename()

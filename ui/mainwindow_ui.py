@@ -83,6 +83,7 @@ class MainWindowUI:
     darkgreenColor = '#50c96e'
     yellowColor = '#f0f58c'
     darkYellowColor = '#ffff00'
+    purpleLight = '#F5EBFC'
 
     def __init__(self, window):
         self.main_window = window
@@ -151,6 +152,7 @@ class MainWindowUI:
         self.fileTreeView.tag_configure('red', background=self.redColor)
         self.fileTreeView.tag_configure('green', background=self.greenColor)
         self.fileTreeView.tag_configure('yellow', background=self.yellowColor)
+        self.fileTreeView.tag_configure('purpleLight', background=self.purpleLight)
 
         # hide it until needed
         self.fileTreeView.grid_remove()
@@ -178,6 +180,7 @@ class MainWindowUI:
         self.rightFileTextArea.tag_configure('darkgreen', background=self.darkgreenColor)
         self.rightFileTextArea.tag_configure('gray', background=self.grayColor)
         self.rightFileTextArea.tag_configure('search', background=self.darkYellowColor)
+        self.rightFileTextArea.tag_configure('purpleLight', background=self.purpleLight)
 
         # disable the text areas
         self.leftFileTextArea.config(state=DISABLED)
