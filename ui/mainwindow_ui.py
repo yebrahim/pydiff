@@ -131,7 +131,7 @@ class MainWindowUI:
         self.rightFileLabel = Label(self.main_window, anchor='center', width=1000, background=self.lightGrayColor)
         self.rightFileLabel.grid(row=self.filePathLabelsRow, column=self.rightFilePathLabelsCol, columnspan=2)
 
-    # Search text entnry
+    # Search text entry
     def create_search_text_entry(self, searchButtonCallback):
         self.searchTextDialog = SearchTextDialog(self.main_window, [self.leftFileTextArea, self.rightFileTextArea], searchButtonCallback)
         self.searchTextDialog.grid(row=self.searchTextRow, column=self.leftFilePathLabelsCol, columnspan=5, sticky=EW)
